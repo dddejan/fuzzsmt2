@@ -1,3 +1,7 @@
+  This is fixed-up version of FuzzSMT based on Robert Brummayer's original 
+  fuzzer (for the smt language), and the patch from Christoph Wintersteiger 
+  (to handle smt2 language). Below is the original README.   
+ 
  ******************************************************************************
  *                           FuzzSMT                                          *
  ******************************************************************************
