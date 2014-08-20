@@ -3855,7 +3855,7 @@ public class FuzzSMT {
       case QF_BOOL:
     	checkMinMax (minNumVars, maxNumVars, "Boolean variables");
     	numVars = selectRandValRange (r, minNumVars, maxNumVars);
-    	break;
+        break;
       case AUFLIRA:
       case AUFNIRA:
         assert (linear || logic != SMTLogic.AUFLIRA);
@@ -4219,6 +4219,7 @@ public class FuzzSMT {
     switch (logic) {
       case QF_BOOL:    	
     	generateBoolVars (boolNodes, numVars);
+      	System.out.print ("(assert ");
     	break;
       case QF_BV:
       case QF_UFBV:{
