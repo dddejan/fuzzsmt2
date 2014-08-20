@@ -21,6 +21,7 @@ import java.util.*;
 
 public enum SMTLogic
 {
+  QF_BOOL,
   QF_A,
   QF_AX,
   QF_BV,
@@ -47,10 +48,23 @@ public enum SMTLogic
   public final static HashMap<String, SMTLogic> stringToLogic;
 
   static {
-    EnumSet<SMTLogic> set = EnumSet.range (QF_A, AUFNIRA);
+    EnumSet<SMTLogic> set = EnumSet.range (QF_BOOL, AUFNIRA);
     stringToLogic = new HashMap<String, SMTLogic>(AUFNIRA.ordinal());
     for (SMTLogic logic : set)
       stringToLogic.put (logic.toString(), logic);
   }
 
+  /** 
+   * Returns the best SMT2 logic that can cover the logic.
+   * @return
+   */
+  public String toSMT2String() {
+	switch (this) {
+	case QF_BOOL:
+		return "QF_UF";
+	default:
+		return toString();
+	}
+  }
+  
 }

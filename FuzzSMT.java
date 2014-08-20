@@ -382,6 +382,12 @@ public class FuzzSMT {
     return numConsts;
   }
 
+  private static int generateBoolVars (List<SMTNode> nodes, int numVars){
+	assert (nodes != null);
+	assert (numVars >= 0);
+	return generateVarsOfOneType (nodes, numVars, BoolType.boolType);
+  }
+  
   private static int generateRealVars (List<SMTNode> nodes, int numVars){
     assert (nodes != null);
     assert (numVars >= 0);
@@ -3043,6 +3049,10 @@ public class FuzzSMT {
 "  -bool-cnf <f>        generate a boolean CNF layer\n" +
 "                       with <f> * <literals> clauses\n" +
 "\n" +
+"QF_BOOL options:\n" +
+"  -mv <vars>           use min <vars> Boolean variables       (default  3)\n" +
+"  -Mv <vars>           use max <vars> Boolean variables       (default  10)\n" +
+"\n" +
 "QF_A and QF_AX options:\n" +
 "  -mar <arrays>        use min <arrays> array variables       (default  1)\n" +
 "  -Mar <arrays>        use max <arrays> array variables       (default  3)\n" +
@@ -3421,9 +3431,13 @@ public class FuzzSMT {
       printHelpAndExit ();
 
     switch (logic) {
+      case QF_BOOL:
+    	minNumVars = 3;
+    	maxNumVars = 10;
+    	break;
       case QF_A:
-	  System.out.println("QF_A is not an SMT-lib 2.0 category.");
-	  System.exit(0);
+	    System.out.println("QF_A is not an SMT-lib 2.0 category.");
+	    System.exit(0);
       case QF_AX:
         minNumArrays = 1;
         maxNumArrays = 3;
@@ -3838,6 +3852,10 @@ public class FuzzSMT {
     assert (numConsts >= 0);
     assert (minRefs >= 1);
     switch (logic) {
+      case QF_BOOL:
+    	checkMinMax (minNumVars, maxNumVars, "Boolean variables");
+    	numVars = selectRandValRange (r, minNumVars, maxNumVars);
+    	break;
       case AUFLIRA:
       case AUFNIRA:
         assert (linear || logic != SMTLogic.AUFLIRA);
@@ -4197,8 +4215,11 @@ public class FuzzSMT {
     System.out.print ("(set-info :smt-lib-version 2.0)\n");
     System.out.print ("(set-info :category \"random\")\n");
     System.out.print ("(set-info :status unknown)\n");
-    System.out.print ("(set-logic " + logic.toString() + ")\n");
+    System.out.print ("(set-logic " + logic.toSMT2String() + ")\n");
     switch (logic) {
+      case QF_BOOL:    	
+    	generateBoolVars (boolNodes, numVars);
+    	break;
       case QF_BV:
       case QF_UFBV:{
         ArrayList<SMTNode> bvNodes = new ArrayList<SMTNode>();
