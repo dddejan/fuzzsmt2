@@ -24,7 +24,7 @@ public class BoolType extends SMTType {
   private BoolType() {}
 
   public String toString() {
-    return "bool";
+    return "Bool";
   }
 
 }
