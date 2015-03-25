@@ -276,7 +276,6 @@ public class FuzzSMT {
   private static int generateBVConsts (Random r, List<SMTNode> nodes,
                                        int numConsts, int minBW, int maxBW) {
     int bw;
-    int size;
     String name;
     SMTNode node;
     BigInteger bi;
@@ -290,7 +289,6 @@ public class FuzzSMT {
     assert (maxBW >= minBW);
 
     builder = new StringBuilder();
-    size = nodes.size();
     for (int i = 0; i < numConsts; i++) {
       bw = selectRandValRange (r, minBW, maxBW);
       assert (bw >= minBW && bw <= maxBW);
@@ -2206,23 +2204,32 @@ public class FuzzSMT {
         }
       } else {
         n = new BigInteger (maxBW, r);
-        builder.append ("(- (+ ");
+        builder.append ("(- ");
+        if (n.compareTo(BigInteger.ONE) == 1) {
+        	builder.append("(+ ");
+        }
         builder.append (v1.getName());
         for (BigInteger i = BigInteger.ZERO; i.compareTo(n) == - 1; 
              i = i.add(BigInteger.ONE)) {
           builder.append (" ");
           builder.append (v1.getName());
         }
-
-        builder.append (") (+ ");
+        if (n.compareTo(BigInteger.ONE) == 1) {
+            builder.append (") (+ ");
+        } else {
+        	builder.append(" ");
+        }
         builder.append (v2.getName());
         for (BigInteger i = BigInteger.ZERO; i.compareTo(n) == - 1; 
              i = i.add(BigInteger.ONE)) {
           builder.append (" ");
           builder.append (v2.getName());
         }
-
-        builder.append (")) ");
+        if (n.compareTo(BigInteger.ONE) == 1) {
+        	builder.append (")) ");
+        } else {
+        	builder.append (") ");
+        }
         if (r.nextBoolean()) {
           builder.append ("(- ");
           builder.append (c1.getName());
