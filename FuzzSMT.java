@@ -3055,6 +3055,7 @@ public class FuzzSMT {
 "  -bool-or             use an n-ary OR for the boolean layer\n" +
 "  -bool-cnf <f>        generate a boolean CNF layer\n" +
 "                       with <f> * <literals> clauses\n" +
+"  -no-ite              don't generate it layer" +
 "\n" +
 "QF_BOOL options:\n" +
 "  -mv <vars>           use min <vars> Boolean variables       (default  3)\n" +
@@ -3421,7 +3422,8 @@ public class FuzzSMT {
     ArrayList<SMTNode> boolNodes = null;
     HashMap<SMTNode, SMTNodeKind> BVDivGuards = null;
     BooleanLayerKind booleanLayerKind = BooleanLayerKind.RANDOM;
-
+    boolean enableITELayer = true;
+    
     if (args.length == 0) {
       System.out.println (usage);
       System.exit (0);
@@ -3682,6 +3684,8 @@ public class FuzzSMT {
         } else if (arg.equals("-bool-cnf")) {
           factor = parseDoubleOption (args, i++, 0.0, "invalid CNF factor");
           booleanLayerKind = BooleanLayerKind.CNF;
+        } else if (arg.equals("-no-ite")) {
+          enableITELayer = false;
         } else if (arg.equals("-ref")) {
           minRefs = parseIntOption (args, i++, 1, "invalid minimum number of references");
         } else if (arg.equals("-mv")) {
@@ -4778,7 +4782,9 @@ public class FuzzSMT {
                                    false);
         pars += generateComparisonLayer (r, realNodes, boolNodes, uPreds,
                                          minRefs, RelCompMode.FULL, false);
-        pars += generateITELayer (r, realNodes, boolNodes, minRefs);
+        if (enableITELayer) {
+        	pars += generateITELayer (r, realNodes, boolNodes, minRefs);
+        }
         pars += generateComparisonLayer (r, realNodes, boolNodes, uPreds, 
                                          minRefs, RelCompMode.FULL, false);
       }
