@@ -2546,7 +2546,7 @@ public class FuzzSMT {
 
     name = "e" + SMTNode.getNodeCtr();
     builder = new StringBuilder(); 
-    builder.append ("(let (");
+    builder.append ("(let ((");
     builder.append (name);
     builder.append (" \n");
     builder.append ("(");
