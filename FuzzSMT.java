@@ -2245,17 +2245,9 @@ public class FuzzSMT {
     assert (minRefs > 0);
     assert (SMTNodeKind.BVULT.ordinal() < SMTNodeKind.BVSGE.ordinal());
 
-    kindSet = EnumSet.range (SMTNodeKind.BVULT, SMTNodeKind.BVSGE);
-    kindSet.add (SMTNodeKind.EQ);
-    kindSet.add (SMTNodeKind.DISTINCT);
     kindSet = EnumSet.of(
-    	      SMTNodeKind.CONCAT, 
-    	      SMTNodeKind.EXTRACT,
-    	      SMTNodeKind.ZERO_EXTEND,
-    	      SMTNodeKind.SIGN_EXTEND,
-    	      SMTNodeKind.EQ,
-    	      SMTNodeKind.DISTINCT,
-    	      SMTNodeKind.ITE);
+    		SMTNodeKind.EQ,
+    	    SMTNodeKind.DISTINCT);
     kinds = kindSet.toArray(new SMTNodeKind[0]);
 
     todoNodes = new HashMap<SMTNode, Integer>();
