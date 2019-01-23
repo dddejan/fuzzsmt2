@@ -1087,6 +1087,192 @@ public class FuzzSMT {
     return nodes.size() - oldSize;
   }
 
+
+  private static int generateBVEQLayer (Random r,  List<SMTNode> nodes,
+                                      int minRefs, int minBW, int maxBW){
+    int oldSize, upper, lower, maxRep, rep, ext, rotate, pos, tmp;
+    int sizeOpTypes, n1BW, n2BW, n3BW, resBW = 0;
+    int sizeUFuncs, sizeUPreds;
+    SMTNodeKind kind;
+    EnumSet<SMTNodeKind> kindSet;
+    SMTNodeKind []kinds;
+    SMTNode []todoNodesArray;
+    String name;
+    Signature sig;
+    HashMap<SMTNode, Integer> todoNodes; 
+    SMTNode n1, n2, n3, tmpNode;
+    BVType curType;
+    List<SMTType> operandTypes;
+    StringBuilder builder;
+
+    assert (r != null);
+    assert (nodes != null);
+    assert (minRefs > 0);
+    assert (!nodes.isEmpty());
+    assert (minBW > 0);
+    assert (maxBW > 0);
+    assert (maxBW >= minBW);
+    assert (SMTNodeKind.BVNOT.ordinal() < SMTNodeKind.CONCAT.ordinal());
+
+    kindSet = EnumSet.of(
+      SMTNodeKind.CONCAT, 
+      SMTNodeKind.EXTRACT,
+      SMTNodeKind.ZERO_EXTEND,
+      SMTNodeKind.SIGN_EXTEND,
+      SMTNodeKind.EQ,
+      SMTNodeKind.DISTINCT,
+      SMTNodeKind.ITE);
+    kinds = kindSet.toArray(new SMTNodeKind[0]);
+
+    oldSize = nodes.size();
+    todoNodes = new HashMap<SMTNode, Integer>();
+    for (int i = 0; i < oldSize; i++)
+      todoNodes.put (nodes.get(i), new Integer(0));
+
+    builder = new StringBuilder();
+    while (!todoNodes.isEmpty()){
+      name = "e" + SMTNode.getNodeCtr();
+      builder.append ("(let ((");
+      builder.append (name);
+      builder.append (" (");
+
+      kind = kinds[r.nextInt (kinds.length)];
+      n1 = nodes.get(r.nextInt(nodes.size()));
+      assert (n1.getType() instanceof BVType);
+      n1BW = ((BVType) n1.getType()).width;
+      switch (kind.arity) {
+        case 1:
+          builder.append (kind.getString());
+          switch (kind) {
+            case EXTRACT:
+              upper = r.nextInt(n1BW);
+              lower = r.nextInt (upper + 1);
+              builder.append (" ");
+              builder.append (upper);
+              builder.append (" ");
+              builder.append (lower);
+              builder.append (") ");
+              resBW = upper - lower + 1;
+              break;
+            case ZERO_EXTEND:
+            case SIGN_EXTEND:
+              ext = r.nextInt(maxBW - n1BW + 1);
+              builder.append (" ");
+              builder.append (ext);
+              builder.append (") ");
+              resBW = n1BW + ext;
+              break;
+            default:
+              assert (kind == SMTNodeKind.REPEAT);
+              maxRep = maxBW / n1BW;
+              rep = r.nextInt(maxRep) + 1;
+              builder.append (" ");
+              builder.append (rep);
+              builder.append (") ");
+              resBW = n1BW * rep;
+              break;
+          }
+          builder.append (n1.getName());
+          updateNodeRefs (todoNodes, n1, minRefs);
+          break;
+        case 2:
+          n2 = nodes.get(r.nextInt(nodes.size()));
+          assert (n2.getType() instanceof BVType);
+          n2BW = ((BVType) n2.getType()).width;
+
+          /* choose another binary operator if concat
+           * exceeds maximum bit-width */
+          if (kind == SMTNodeKind.CONCAT && n1BW + n2BW > maxBW) {
+            do {
+              kind = kinds[r.nextInt (kinds.length)];
+            } while (kind.arity != 2 || kind == SMTNodeKind.CONCAT);
+          }
+
+          switch (kind) {
+            case EQ:
+              /* encode boolean results into bit-vector */
+              builder.append ("ite (");
+              builder.append (kind.getString());
+              builder.append (" ");
+              builder.append (wrapEqualBW (r, n1, n2));
+              builder.append (") (_ bv1 1) (_ bv0 1)");
+              resBW = 1;
+              break;
+            case CONCAT:
+              builder.append (kind.getString());
+              builder.append (" ");
+              builder.append (n1.getName());
+              builder.append (" ");
+              builder.append (n2.getName());
+              resBW = n1BW + n2BW;
+              break;
+            default:
+              builder.append (kind.getString());
+              builder.append (" ");
+              builder.append (wrapEqualBW (r, n1, n2));
+              if (n1BW < n2BW)
+                resBW = n2BW;
+              else
+                resBW = n1BW;
+              break;
+          }
+          updateNodeRefs (todoNodes, n1, minRefs);
+          updateNodeRefs (todoNodes, n2, minRefs);
+          break;
+        case 3:
+          assert (kind == SMTNodeKind.ITE);
+          n2 = nodes.get(r.nextInt(nodes.size()));
+          assert (n2.getType() instanceof BVType);
+          n2BW = ((BVType) n2.getType()).width;
+          n3 = nodes.get(r.nextInt(nodes.size()));
+          assert (n3.getType() instanceof BVType);
+          n3BW = ((BVType) n3.getType()).width;
+          pos = r.nextInt(n1BW);
+          builder.append (kind.getString());
+          /* ite condition: is bit at random bit position set to 1? */
+          builder.append (" (= (_ bv1 1) ((_ extract ");
+          builder.append (pos);
+          builder.append (" ");
+          builder.append (pos);
+          builder.append (") ");
+          builder.append (n1.getName());
+          builder.append (")) ");
+          builder.append (wrapEqualBW(r, n2, n3));
+          if (n2BW < n3BW)
+            resBW = n3BW;
+          else  
+            resBW = n2BW;
+          updateNodeRefs (todoNodes, n1, minRefs);
+          updateNodeRefs (todoNodes, n2, minRefs);
+          updateNodeRefs (todoNodes, n3, minRefs);
+          break;
+        default:
+          assert (kind.arity == -1);
+          assert (kind == SMTNodeKind.DISTINCT);
+          n2 = nodes.get(r.nextInt(nodes.size()));
+          assert (n2.getType() instanceof BVType);
+          n2BW = ((BVType) n2.getType()).width;
+          builder.append ("ite (");
+          builder.append (kind.getString());
+          builder.append (" ");
+          builder.append (wrapEqualBW (r, n1, n2));
+          builder.append (") (_ bv1 1) (_ bv0 1)");
+          resBW = 1;
+          updateNodeRefs (todoNodes, n1, minRefs);
+          updateNodeRefs (todoNodes, n2, minRefs);    
+          break;
+      }
+
+      builder.append (")))\n");
+      assert (resBW <= maxBW);
+      nodes.add (new SMTNode (new BVType (resBW), name));
+
+    }
+    System.out.print (builder.toString());
+    assert (nodes.size() - oldSize > 0);
+    return nodes.size() - oldSize;
+  }
+
   private static int generateBVWriteLayer (Random r, List<SMTNode> arrays, 
                                            List<SMTNode> bvs, int numWrites){
 
@@ -2026,6 +2212,77 @@ public class FuzzSMT {
         updateNodeRefs (todoNodes, n1, minRefs);
         updateNodeRefs (todoNodes, n2, minRefs);
       }
+      builder.append (")))\n");
+      boolNodes.add (new SMTNode (BoolType.boolType, name));
+    }
+    System.out.print (builder.toString());
+    assert (boolNodes.size() - oldSize > 0);
+    return boolNodes.size() - oldSize;
+  }
+
+  private static int generateBVEQPredicateLayer (Random r, 
+                                               List<SMTNode> bvNodes,
+                                               List<SMTNode> boolNodes,
+                                               int minRefs) {
+    SMTNodeKind kind;
+    EnumSet<SMTNodeKind> kindSet;
+    SMTNodeKind [] kinds;
+    String name;
+    HashMap<SMTNode, Integer> todoNodes; 
+    HashMap<UPred, Integer> todoUPreds; 
+    UPred []todoUPredsArray;
+    UPred uPred;
+    SMTNode n1, n2;
+    int oldSize, sizeBVNodes, sizeOpTypes, sizeUPreds;
+    Signature sig;
+    StringBuilder builder;
+    List<SMTType> operandTypes;
+    BVType curType;
+
+    assert (bvNodes != null);
+    assert (!bvNodes.isEmpty());
+    assert (boolNodes != null);
+    assert (minRefs > 0);
+    assert (SMTNodeKind.BVULT.ordinal() < SMTNodeKind.BVSGE.ordinal());
+
+    kindSet = EnumSet.range (SMTNodeKind.BVULT, SMTNodeKind.BVSGE);
+    kindSet.add (SMTNodeKind.EQ);
+    kindSet.add (SMTNodeKind.DISTINCT);
+    kindSet = EnumSet.of(
+    	      SMTNodeKind.CONCAT, 
+    	      SMTNodeKind.EXTRACT,
+    	      SMTNodeKind.ZERO_EXTEND,
+    	      SMTNodeKind.SIGN_EXTEND,
+    	      SMTNodeKind.EQ,
+    	      SMTNodeKind.DISTINCT,
+    	      SMTNodeKind.ITE);
+    kinds = kindSet.toArray(new SMTNodeKind[0]);
+
+    todoNodes = new HashMap<SMTNode, Integer>();
+    for (int i = 0; i < bvNodes.size(); i++)
+      todoNodes.put (bvNodes.get(i), new Integer(0));
+
+    todoUPreds = new HashMap<UPred, Integer>();
+
+    builder = new StringBuilder();
+    oldSize = boolNodes.size();
+    sizeBVNodes = bvNodes.size();
+    while (!todoNodes.isEmpty() || !todoUPreds.isEmpty()){
+         name = "e" + SMTNode.getNodeCtr();
+      builder.append ("(let ((");
+      builder.append (name);
+      builder.append (" (");
+      kind = kinds[r.nextInt (kinds.length)];
+      assert (kind.arity == 2 || kind.arity == -1);
+      n1 = bvNodes.get(r.nextInt(sizeBVNodes));
+      assert (n1.getType() instanceof BVType);
+      n2 = bvNodes.get(r.nextInt(sizeBVNodes));
+      assert (n2.getType() instanceof BVType);
+      builder.append (kind.getString());
+      builder.append (" ");
+      builder.append (wrapEqualBW (r, n1, n2));
+      updateNodeRefs (todoNodes, n1, minRefs);
+      updateNodeRefs (todoNodes, n2, minRefs);
       builder.append (")))\n");
       boolNodes.add (new SMTNode (BoolType.boolType, name));
     }
@@ -3217,7 +3474,7 @@ public class FuzzSMT {
 "  -ref <refs>          set min number of references for terms\n" + 
 "                       in input and main layer to <refs>      (default  1)\n" +
 "\n" +
-"QF_BV and QF_UFBV options:\n" +
+"QF_BV, QF_BVEQ, and QF_UFBV options:\n" +
 "  -mv <vars>           use min <vars> bit-vector variables    (default  1)\n" +
 "  -Mv <vars>           use max <vars> bit-vector variables    (default  5)\n" +
 "  -mc <consts>         use min <const> bit-vector constants   (default  1)\n" +
@@ -3583,6 +3840,7 @@ public class FuzzSMT {
         maxArgs = 3;
         /* fall through by intenion */
       case QF_BV:
+      case QF_BVEQ:
         minNumVars = 1;
         maxNumVars = 5;
         minNumConsts = 1;
@@ -4054,6 +4312,7 @@ public class FuzzSMT {
         numUPreds = selectRandValRange (r, minNumUPreds, maxNumUPreds);
         /* fall through by intention */
       case QF_BV:
+      case QF_BVEQ:
         assert (minNumVars > 0);
         assert (maxNumVars > 0);
         assert (minNumConsts > 0);
@@ -4229,7 +4488,7 @@ public class FuzzSMT {
     System.out.print ("(set-logic " + logic.toSMT2String() + ")\n");
     switch (logic) {
       case QF_BOOL:    	
-    	generateBoolVars (boolNodes, numVars);
+    	  generateBoolVars (boolNodes, numVars);
       	System.out.print ("(assert ");
     	break;
       case QF_BV:
@@ -4247,6 +4506,16 @@ public class FuzzSMT {
                                  BVDivGuards, false, uFuncs, uPreds);
         pars += generateBVPredicateLayer (r, bvNodes, boolNodes, minRefs,
                                           uPreds);
+      }
+      break;
+      case QF_BVEQ:{
+        ArrayList<SMTNode> bvNodes = new ArrayList<SMTNode>();
+        ArrayList<UPred> uPreds = new ArrayList<UPred>();
+        generateBVVars (r, bvNodes, numVars, minBW, maxBW);
+        System.out.print ("(assert ");
+        pars += generateBVConsts (r, bvNodes, numConsts, minBW, maxBW); 
+        pars += generateBVEQLayer (r, bvNodes, minRefs, minBW, maxBW);
+        pars += generateBVEQPredicateLayer (r, bvNodes, boolNodes, minRefs);
       }
       break;
       case QF_AUFBV: {

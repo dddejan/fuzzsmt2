@@ -25,6 +25,7 @@ public enum SMTLogic
   QF_A,
   QF_AX,
   QF_BV,
+  QF_BVEQ,
   QF_AUFBV,
   QF_AUFLIA,
   QF_IDL,
@@ -61,7 +62,9 @@ public enum SMTLogic
   public String toSMT2String() {
 	switch (this) {
 	case QF_BOOL:
-		return "QF_UF";
+    return "QF_UF";
+  case QF_BVEQ:
+    return "QF_BV";
 	default:
 		return toString();
 	}
