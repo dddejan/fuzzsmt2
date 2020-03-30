@@ -50,7 +50,7 @@ public class FuzzSMT {
     return result;
   }
 
-  private static void updateStringRefs (HashMap<String, Integer> map, 
+  private static void updateStringRefs (HashMap<String, Integer> map,
                                         String string, int minRefs){
     Integer refs;
 
@@ -69,7 +69,7 @@ public class FuzzSMT {
   }
 
 
-  private static void updateNodeRefs (HashMap<SMTNode, Integer> map, 
+  private static void updateNodeRefs (HashMap<SMTNode, Integer> map,
                                       SMTNode node, int minRefs){
     Integer refs;
 
@@ -87,7 +87,7 @@ public class FuzzSMT {
     }
   }
 
-  private static void updateFuncRefs (HashMap<UFunc, Integer> map, 
+  private static void updateFuncRefs (HashMap<UFunc, Integer> map,
                                       UFunc uFunc, int minRefs){
     Integer refs;
 
@@ -105,7 +105,7 @@ public class FuzzSMT {
     }
   }
 
-  private static void updatePredRefs (HashMap<UPred, Integer> map, 
+  private static void updatePredRefs (HashMap<UPred, Integer> map,
                                       UPred uPred, int minRefs){
     Integer refs;
 
@@ -164,7 +164,7 @@ public class FuzzSMT {
       builder.append (ext);
       builder.append (") ");
       builder.append (n2.getName());
-      builder.append (")"); 
+      builder.append (")");
     }
     return builder.toString();
   }
@@ -217,7 +217,7 @@ public class FuzzSMT {
 /* Input Layer                                                                */
 /*----------------------------------------------------------------------------*/
 
-  private static int generateVarsOfOneType (List<SMTNode> nodes, int numVars, 
+  private static int generateVarsOfOneType (List<SMTNode> nodes, int numVars,
                                             SMTType type){
     String name;
     StringBuilder builder;
@@ -234,7 +234,8 @@ public class FuzzSMT {
       builder.append (" () ");
       builder.append (type.toString());
       builder.append (")\n");
-      nodes.add (new SMTNode (type, name));
+      SMTNode node = new SMTNode (type, name);
+      nodes.add(node);
     }
     System.out.print (builder.toString());
     return numVars;
@@ -325,9 +326,9 @@ public class FuzzSMT {
 
     builder = new StringBuilder();
     for (int i = 0; i < numArrays; i++) {
-      indexWidth = selectRandValRange (r, minBW, maxBW); 
+      indexWidth = selectRandValRange (r, minBW, maxBW);
       assert (indexWidth >= minBW && indexWidth <= maxBW);
-      valWidth = selectRandValRange (r, minBW, maxBW); 
+      valWidth = selectRandValRange (r, minBW, maxBW);
       assert (valWidth >= minBW && valWidth <= maxBW);
       name = "a" + SMTNode.getNodeCtr();
       builder.append ("(declare-fun ");
@@ -347,7 +348,7 @@ public class FuzzSMT {
   private static int generateIntVars (List<SMTNode> nodes, int numVars){
     assert (nodes != null);
     assert (numVars >= 0);
-    return generateVarsOfOneType (nodes, numVars, IntType.intType); 
+    return generateVarsOfOneType (nodes, numVars, IntType.intType);
   }
 
   private static int generateIntConsts (Random r, List<SMTNode> nodes,
@@ -385,7 +386,7 @@ public class FuzzSMT {
 	assert (numVars >= 0);
 	return generateVarsOfOneType (nodes, numVars, BoolType.boolType);
   }
-  
+
   private static int generateRealVars (List<SMTNode> nodes, int numVars){
     assert (nodes != null);
     assert (numVars >= 0);
@@ -394,9 +395,9 @@ public class FuzzSMT {
 
   /* generates non empty list of int constants.
    * at least one constant is not mapped to zero */
-  private static int generateIntConstsNotFilledZero (Random r,  
+  private static int generateIntConstsNotFilledZero (Random r,
                                                      List<SMTNode> nodes,
-                                                     Set<SMTNode> zeroConsts, 
+                                                     Set<SMTNode> zeroConsts,
                                                      int numConsts, int maxBW){
     String name;
     BigInteger bi;
@@ -409,7 +410,7 @@ public class FuzzSMT {
     assert (zeroConsts != null);
     assert (numConsts > 0);
     assert (maxBW > 0);
-    
+
     do {
       bw = r.nextInt (maxBW) + 1;
       bi = new BigInteger(bw, r);
@@ -437,9 +438,9 @@ public class FuzzSMT {
 
   /* generates non empty list of real constants.
    * at least one constant is not mapped to zero */
-  private static int generateRealConstsNotFilledZero (Random r,  
+  private static int generateRealConstsNotFilledZero (Random r,
                                                       List<SMTNode> nodes,
-                                                      Set<SMTNode> zeroConsts, 
+                                                      Set<SMTNode> zeroConsts,
                                                       int numConsts, int maxBW,
                                                       boolean printAsReal){
     String name;
@@ -453,7 +454,7 @@ public class FuzzSMT {
     assert (zeroConsts != null);
     assert (numConsts > 0);
     assert (maxBW > 0);
-    
+
     do {
       bw = r.nextInt (maxBW) + 1;
       bi = new BigInteger(bw, r);
@@ -517,8 +518,8 @@ public class FuzzSMT {
     return generated;
   }
 
-  private static int generateUFuncs (Random r, List<SMTType> sorts, 
-                                     List<UFunc> funcs, int minNumFuncs, 
+  private static int generateUFuncs (Random r, List<SMTType> sorts,
+                                     List<UFunc> funcs, int minNumFuncs,
                                      int minArgs, int maxArgs) {
     int generated = 0;
     int numArgs, sizeSorts;
@@ -547,12 +548,12 @@ public class FuzzSMT {
     todoArg = new HashSet<SMTType>();
     for (int i = 0; i < sizeSorts; i++)
       todoArg.add (sorts.get(i));
-    
+
     builder = new StringBuilder();
     while (!todoResult.isEmpty() || !todoArg.isEmpty() ||
            generated < minNumFuncs){
       name = "f" + UFunc.getFuncsCtr();
-      numArgs = selectRandValRange (r, minArgs, maxArgs); 
+      numArgs = selectRandValRange (r, minArgs, maxArgs);
       assert (numArgs >= minArgs);
       assert (numArgs <= maxArgs);
       operandTypes = new ArrayList<SMTType>(numArgs);
@@ -583,8 +584,8 @@ public class FuzzSMT {
     return generated;
   }
 
-  private static int generateUPreds (Random r, List<SMTType> sorts, 
-                                     List<UPred> preds, int minNumPreds, 
+  private static int generateUPreds (Random r, List<SMTType> sorts,
+                                     List<UPred> preds, int minNumPreds,
                                      int minArgs, int maxArgs) {
     int generated = 0;
     int numArgs, sizeSorts;
@@ -608,7 +609,7 @@ public class FuzzSMT {
     todo = new HashSet<SMTType>();
     for (int i = 0; i < sizeSorts; i++)
       todo.add (sorts.get(i));
-    
+
     builder = new StringBuilder();
     while (!todo.isEmpty() || generated < minNumPreds){
       name = "p" + UPred.getPredsCtr();
@@ -639,7 +640,7 @@ public class FuzzSMT {
     return generated;
   }
 
-  private static int generateUFuncsBV (Random r, List<UFunc> funcs, 
+  private static int generateUFuncsBV (Random r, List<UFunc> funcs,
                                        int numFuncs, int minArgs, int maxArgs,
                                        int minBW, int maxBW) {
     int numArgs, bw;
@@ -690,7 +691,7 @@ public class FuzzSMT {
     return numFuncs;
   }
 
-  private static int generateUPredsBV (Random r, List<UPred> preds, 
+  private static int generateUPredsBV (Random r, List<UPred> preds,
                                        int numPreds, int minArgs, int maxArgs,
                                        int minBW, int maxBW) {
     int numArgs, bw;
@@ -759,9 +760,9 @@ public class FuzzSMT {
     UFunc uFunc;
     UPred uPred;
     Signature sig;
-    HashMap<SMTNode, Integer> todoNodes; 
-    HashMap<UFunc, Integer> todoUFuncs; 
-    HashMap<UPred, Integer> todoUPreds; 
+    HashMap<SMTNode, Integer> todoNodes;
+    HashMap<UFunc, Integer> todoUFuncs;
+    HashMap<UPred, Integer> todoUPreds;
     SMTNode n1, n2, n3, tmpNode;
     BVType curType;
     List<SMTType> operandTypes;
@@ -829,7 +830,7 @@ public class FuzzSMT {
       else
         kind = kinds[r.nextInt (kinds.length)];
 
-      if (noBlowup && r.nextBoolean() && !todoNodes.isEmpty()) { 
+      if (noBlowup && r.nextBoolean() && !todoNodes.isEmpty()) {
         todoNodesArray = todoNodes.keySet().toArray(new SMTNode[0]);
         n1 = todoNodesArray[r.nextInt(todoNodesArray.length)];
       } else {
@@ -930,7 +931,7 @@ public class FuzzSMT {
             case BVSREM:
             case BVSMOD:
               if (divMode == BVDivMode.GUARD) {
-                /* assumption 
+                /* assumption
                  * wrapEqualBW tries to extend the first node before
                  * it tries to extend the second node
                  */
@@ -945,7 +946,7 @@ public class FuzzSMT {
                   n2 = tmpNode;
                 }
                 /* update guards if necessary */
-                if (!guards.containsKey(n2) || 
+                if (!guards.containsKey(n2) ||
                     guards.get(n2) == SMTNodeKind.BVUDIV ||
                     guards.get(n2) == SMTNodeKind.BVUREM)
                   guards.put(n2, kind);
@@ -989,7 +990,7 @@ public class FuzzSMT {
           builder.append (wrapEqualBW(r, n2, n3));
           if (n2BW < n3BW)
             resBW = n3BW;
-          else  
+          else
             resBW = n2BW;
           updateNodeRefs (todoNodes, n1, minRefs);
           updateNodeRefs (todoNodes, n2, minRefs);
@@ -1089,7 +1090,7 @@ public class FuzzSMT {
 
 
   private static int generateBVEQLayer (Random r,  List<SMTNode> nodes,
-                                      int minRefs, int minBW, int maxBW){
+                                      int minRefs, int minBW, int maxBW, boolean enableITELayer){
     int oldSize, upper, lower, maxRep, rep, ext, rotate, pos, tmp;
     int sizeOpTypes, n1BW, n2BW, n3BW, resBW = 0;
     int sizeUFuncs, sizeUPreds;
@@ -1099,7 +1100,7 @@ public class FuzzSMT {
     SMTNode []todoNodesArray;
     String name;
     Signature sig;
-    HashMap<SMTNode, Integer> todoNodes; 
+    HashMap<SMTNode, Integer> todoNodes;
     SMTNode n1, n2, n3, tmpNode;
     BVType curType;
     List<SMTType> operandTypes;
@@ -1115,13 +1116,16 @@ public class FuzzSMT {
     assert (SMTNodeKind.BVNOT.ordinal() < SMTNodeKind.CONCAT.ordinal());
 
     kindSet = EnumSet.of(
-      SMTNodeKind.CONCAT, 
+      SMTNodeKind.CONCAT,
       SMTNodeKind.EXTRACT,
       SMTNodeKind.ZERO_EXTEND,
-      SMTNodeKind.SIGN_EXTEND,
-      SMTNodeKind.EQ,
-      SMTNodeKind.DISTINCT,
-      SMTNodeKind.ITE);
+      SMTNodeKind.SIGN_EXTEND);
+    if (enableITELayer) {
+    	kindSet.add(SMTNodeKind.EQ);
+    	kindSet.add(SMTNodeKind.DISTINCT);
+    	kindSet.add(SMTNodeKind.ITE);
+    }
+
     kinds = kindSet.toArray(new SMTNodeKind[0]);
 
     oldSize = nodes.size();
@@ -1180,12 +1184,17 @@ public class FuzzSMT {
           assert (n2.getType() instanceof BVType);
           n2BW = ((BVType) n2.getType()).width;
 
-          /* choose another binary operator if concat
-           * exceeds maximum bit-width */
-          if (kind == SMTNodeKind.CONCAT && n1BW + n2BW > maxBW) {
-            do {
-              kind = kinds[r.nextInt (kinds.length)];
-            } while (kind.arity != 2 || kind == SMTNodeKind.CONCAT);
+          if (!enableITELayer) {
+            /* no ites meens not booleans, means no other binaries, so
+             * we just do an extract.
+          } else {
+            /* choose another binary operator if concat
+             * exceeds maximum bit-width */
+        	if (kind == SMTNodeKind.CONCAT && n1BW + n2BW > maxBW) {
+              do {
+                kind = kinds[r.nextInt (kinds.length)];
+              } while (kind.arity != 2 || kind == SMTNodeKind.CONCAT);
+            }
           }
 
           switch (kind) {
@@ -1240,7 +1249,7 @@ public class FuzzSMT {
           builder.append (wrapEqualBW(r, n2, n3));
           if (n2BW < n3BW)
             resBW = n3BW;
-          else  
+          else
             resBW = n2BW;
           updateNodeRefs (todoNodes, n1, minRefs);
           updateNodeRefs (todoNodes, n2, minRefs);
@@ -1259,7 +1268,7 @@ public class FuzzSMT {
           builder.append (") (_ bv1 1) (_ bv0 1)");
           resBW = 1;
           updateNodeRefs (todoNodes, n1, minRefs);
-          updateNodeRefs (todoNodes, n2, minRefs);    
+          updateNodeRefs (todoNodes, n2, minRefs);
           break;
       }
 
@@ -1273,7 +1282,7 @@ public class FuzzSMT {
     return nodes.size() - oldSize;
   }
 
-  private static int generateBVWriteLayer (Random r, List<SMTNode> arrays, 
+  private static int generateBVWriteLayer (Random r, List<SMTNode> arrays,
                                            List<SMTNode> bvs, int numWrites){
 
     int aIndexWidth, aValWidth, indexWidth, valWidth;
@@ -1318,7 +1327,7 @@ public class FuzzSMT {
     return numWrites;
   }
 
-  private static int generateBVReadLayer (Random r, List<SMTNode> arrays, 
+  private static int generateBVReadLayer (Random r, List<SMTNode> arrays,
                                           List<SMTNode> bvs, int numReads){
 
     int aIndexWidth, aValWidth, indexWidth, sizeArrays;
@@ -1359,7 +1368,7 @@ public class FuzzSMT {
     return numReads;
   }
 
-  private static int generateBVArrayExtBVLayer (Random r, List<SMTNode> arrays, 
+  private static int generateBVArrayExtBVLayer (Random r, List<SMTNode> arrays,
                                                 List<SMTNode> bvs, int numExt) {
 
     SMTNode a1, a2;
@@ -1398,13 +1407,13 @@ public class FuzzSMT {
     return bvs.size() - oldSize;
   }
 
-  private static int generateWriteLayer (Random r, List<SMTNode> arrays, 
-                                         List<SMTNode> indices, 
-                                         List<SMTNode> elements, 
+  private static int generateWriteLayer (Random r, List<SMTNode> arrays,
+                                         List<SMTNode> indices,
+                                         List<SMTNode> elements,
                                          SMTType resultType,
                                          int numWrites) {
 
-    int oldSize, sizeIndices, sizeElements; 
+    int oldSize, sizeIndices, sizeElements;
     SMTNode array, index, element;
     String name;
     StringBuilder builder;
@@ -1443,7 +1452,7 @@ public class FuzzSMT {
     return numWrites;
   }
 
-  private static int generateReadLayer (Random r, List<SMTNode> arrays, 
+  private static int generateReadLayer (Random r, List<SMTNode> arrays,
                                         List<SMTNode> indices,
                                         List<SMTNode> elements,
                                         SMTType resultType,
@@ -1485,14 +1494,14 @@ public class FuzzSMT {
   }
 
   private static int generateIntLayer (Random r, List<SMTNode> intNodes,
-                                       List<SMTNode> intConsts, 
+                                       List<SMTNode> intConsts,
                                        List<UFunc> uFuncs, List<UPred> uPreds,
-                                       boolean linear, int minRefs, 
-                                       boolean noBlowup){ 
-    HashMap<SMTNode, Integer> todoIntNodes; 
-    HashMap<SMTNode, Integer> todoIntConsts; 
-    HashMap<UFunc, Integer> todoUFuncs; 
-    HashMap<UPred, Integer> todoUPreds; 
+                                       boolean linear, int minRefs,
+                                       boolean noBlowup){
+    HashMap<SMTNode, Integer> todoIntNodes;
+    HashMap<SMTNode, Integer> todoIntConsts;
+    HashMap<UFunc, Integer> todoUFuncs;
+    HashMap<UPred, Integer> todoUPreds;
     int oldSize, sizeIntConsts, sizeOpTypes, sizeUFuncs, sizeUPreds;
     String name;
     SMTNode n1, n2;
@@ -1677,7 +1686,7 @@ public class FuzzSMT {
           break;
       }
       builder.append (")))\n");
-        
+
       intNodes.add (new SMTNode (IntType.intType, name));
     }
     System.out.print (builder.toString());
@@ -1686,16 +1695,16 @@ public class FuzzSMT {
   }
 
   private static int generateRealLayer (Random r, List<SMTNode> realNodes,
-                                        List<SMTNode> intConstsAsReal, 
-                                        Set<SMTNode> zeroConsts, 
+                                        List<SMTNode> intConstsAsReal,
+                                        Set<SMTNode> zeroConsts,
                                         List<UFunc> uFuncs, List<UPred> uPreds,
-                                        boolean linear, 
+                                        boolean linear,
                                         boolean printConstsAsReal,
-                                        int minRefs, boolean noBlowup){ 
-    HashMap<SMTNode, Integer> todoRealNodes; 
-    HashMap<SMTNode, Integer> todoIntConsts; 
-    HashMap<UFunc, Integer> todoUFuncs; 
-    HashMap<UPred, Integer> todoUPreds; 
+                                        int minRefs, boolean noBlowup){
+    HashMap<SMTNode, Integer> todoRealNodes;
+    HashMap<SMTNode, Integer> todoIntConsts;
+    HashMap<UFunc, Integer> todoUFuncs;
+    HashMap<UPred, Integer> todoUPreds;
     int oldSize, sizeIntConsts, sizeUFuncs, sizeUPreds, sizeOpTypes;
     String name;
     SMTNode []todoArray;
@@ -1718,8 +1727,8 @@ public class FuzzSMT {
     assert (!intConstsAsReal.isEmpty());
     assert (zeroConsts != null);
     assert (zeroConsts.size() < intConstsAsReal.size());
-    assert (uFuncs != null); 
-    assert (uPreds != null); 
+    assert (uFuncs != null);
+    assert (uPreds != null);
     assert (minRefs > 0);
 
     kindSet = EnumSet.range (SMTNodeKind.PLUS, SMTNodeKind.DIV);
@@ -1903,7 +1912,7 @@ public class FuzzSMT {
             updateNodeRefs (todoRealNodes, n2, minRefs);
           }
           builder.append (") ");
-          if (printConstsAsReal) 
+          if (printConstsAsReal)
             builder.append ("1.0 0.0");
           else
             builder.append ("1 0");
@@ -1911,7 +1920,7 @@ public class FuzzSMT {
           break;
       }
       builder.append (")))\n");
-        
+
       realNodes.add (new SMTNode (RealType.realType, name));
     }
     System.out.print (builder.toString());
@@ -1919,15 +1928,15 @@ public class FuzzSMT {
     return realNodes.size() - oldSize;
   }
 
-  private static int generateUTermLayer (Random r, List<SMTType> sorts, 
-                                         List<SMTNode> nodes, 
+  private static int generateUTermLayer (Random r, List<SMTType> sorts,
+                                         List<SMTNode> nodes,
                                          List<UFunc> funcs, int minRefs) {
 
     int oldSize, sizeFuncs, sizeSorts, sizeOperandTypes;
     String name;
-    HashMap<SMTNode, Integer> todoNodes; 
-    HashMap<SMTType, ArrayList<UFunc>> opTypeToUFuncs; 
-    HashSet<UFunc> todoFuncs; 
+    HashMap<SMTNode, Integer> todoNodes;
+    HashMap<SMTType, ArrayList<UFunc>> opTypeToUFuncs;
+    HashSet<UFunc> todoFuncs;
     ArrayList<UFunc> typeMappings;
     UFunc func;
     Signature sig;
@@ -1985,7 +1994,7 @@ public class FuzzSMT {
       builder.append ("(let ((");
       builder.append (name);
       builder.append (" (");
-      /* either select function or at least one 
+      /* either select function or at least one
        * node from the todo list to prevent
        * blowup because of incompatible types */
       if (r.nextBoolean() || todoNodes.isEmpty()) {
@@ -2078,17 +2087,17 @@ public class FuzzSMT {
       builder.append ("(let ((");
       builder.append (name);
       builder.append (" (ite ");
-      /* either choose a random formula or one of the todo list 
+      /* either choose a random formula or one of the todo list
        * to prevent blowup */
       if (r.nextBoolean() || todoBoolNodes.isEmpty()){
         f = boolNodes.get(r.nextInt(sizeBoolNodes));
-      } else { 
+      } else {
         nArray = todoBoolNodes.keySet().toArray(new SMTNode[0]);
         f = nArray[r.nextInt(nArray.length)];
       }
       assert (f.getType() == BoolType.boolType);
       builder.append (f.getName());
-      /* either choose a random term or one of the todo list 
+      /* either choose a random term or one of the todo list
        * to prevent blowup because of incomatible types */
       if (r.nextBoolean() || todoNodes.isEmpty()) {
         n1 = nodes.get(r.nextInt(nodes.size()));
@@ -2121,17 +2130,17 @@ public class FuzzSMT {
 /* Predicate Layer                                                            */
 /*----------------------------------------------------------------------------*/
 
-  private static int generateBVPredicateLayer (Random r, 
+  private static int generateBVPredicateLayer (Random r,
                                                List<SMTNode> bvNodes,
                                                List<SMTNode> boolNodes,
-                                               int minRefs, 
+                                               int minRefs,
                                                List<UPred> uPreds) {
     SMTNodeKind kind;
     EnumSet<SMTNodeKind> kindSet;
     SMTNodeKind [] kinds;
     String name;
-    HashMap<SMTNode, Integer> todoNodes; 
-    HashMap<UPred, Integer> todoUPreds; 
+    HashMap<SMTNode, Integer> todoNodes;
+    HashMap<UPred, Integer> todoUPreds;
     UPred []todoUPredsArray;
     UPred uPred;
     SMTNode n1, n2;
@@ -2175,7 +2184,7 @@ public class FuzzSMT {
        * if todo list ist not empty */
       if (!todoUPreds.isEmpty() && r.nextBoolean())
         kind = SMTNodeKind.UPRED;
-      else 
+      else
         kind = kinds[r.nextInt (kinds.length)];
       assert (kind.arity == 2 || kind.arity == -1);
       if (kind == SMTNodeKind.UPRED) {
@@ -2220,7 +2229,7 @@ public class FuzzSMT {
     return boolNodes.size() - oldSize;
   }
 
-  private static int generateBVEQPredicateLayer (Random r, 
+  private static int generateBVEQPredicateLayer (Random r,
                                                List<SMTNode> bvNodes,
                                                List<SMTNode> boolNodes,
                                                int minRefs) {
@@ -2228,8 +2237,8 @@ public class FuzzSMT {
     EnumSet<SMTNodeKind> kindSet;
     SMTNodeKind [] kinds;
     String name;
-    HashMap<SMTNode, Integer> todoNodes; 
-    HashMap<UPred, Integer> todoUPreds; 
+    HashMap<SMTNode, Integer> todoNodes;
+    HashMap<UPred, Integer> todoUPreds;
     UPred []todoUPredsArray;
     UPred uPred;
     SMTNode n1, n2;
@@ -2292,7 +2301,7 @@ public class FuzzSMT {
     SMTNodeKind [] kinds;
     SMTNodeKind kind;
     String name;
-    HashMap<SMTNode, Integer> todo; 
+    HashMap<SMTNode, Integer> todo;
     SMTNode v1, v2, c;
     StringBuilder builder;
 
@@ -2361,9 +2370,9 @@ public class FuzzSMT {
   }
 
   private static int generateRDLLayer (Random r, List<SMTNode> realVars,
-                                       List<SMTNode> intConsts, 
+                                       List<SMTNode> intConsts,
                                        Set<SMTNode> zeroConsts,
-                                       List<SMTNode> boolNodes, int minRefs, 
+                                       List<SMTNode> boolNodes, int minRefs,
                                        int maxBW){
 
     int oldSize, sizeRealVars, sizeIntConsts;
@@ -2371,9 +2380,9 @@ public class FuzzSMT {
     SMTNodeKind [] kinds;
     SMTNodeKind kind;
     String name;
-    HashMap<SMTNode, Integer> todo; 
+    HashMap<SMTNode, Integer> todo;
     SMTNode v1, v2, c1, c2;
-    BigInteger n; 
+    BigInteger n;
     StringBuilder builder;
 
     assert (r != null);
@@ -2431,7 +2440,7 @@ public class FuzzSMT {
             }
           } else {
             do {
-              c2 = intConsts.get(r.nextInt(intConsts.size())); 
+              c2 = intConsts.get(r.nextInt(intConsts.size()));
             } while (zeroConsts.contains(c2));
             builder.append ("(/ ");
             builder.append (c1.getName());
@@ -2458,7 +2467,7 @@ public class FuzzSMT {
         	builder.append("(+ ");
         }
         builder.append (v1.getName());
-        for (BigInteger i = BigInteger.ZERO; i.compareTo(n) == - 1; 
+        for (BigInteger i = BigInteger.ZERO; i.compareTo(n) == - 1;
              i = i.add(BigInteger.ONE)) {
           builder.append (" ");
           builder.append (v1.getName());
@@ -2469,7 +2478,7 @@ public class FuzzSMT {
         	builder.append(" ");
         }
         builder.append (v2.getName());
-        for (BigInteger i = BigInteger.ZERO; i.compareTo(n) == - 1; 
+        for (BigInteger i = BigInteger.ZERO; i.compareTo(n) == - 1;
              i = i.add(BigInteger.ONE)) {
           builder.append (" ");
           builder.append (v2.getName());
@@ -2499,7 +2508,7 @@ public class FuzzSMT {
   }
 
   private static int generateComparisonLayer (Random r, List<SMTNode> nodes,
-                                              List<SMTNode> boolNodes, 
+                                              List<SMTNode> boolNodes,
                                               List<UPred> uPreds,
                                               int minRefs, RelCompMode compMode,
                                               boolean noBlowup) {
@@ -2511,8 +2520,8 @@ public class FuzzSMT {
     SMTNode []todoNodesArray;
     UPred []todoUPredsArray;
     String name;
-    HashMap<SMTNode, Integer> todoNodes; 
-    HashMap<UPred, Integer> todoUPreds; 
+    HashMap<SMTNode, Integer> todoNodes;
+    HashMap<UPred, Integer> todoUPreds;
     SMTNode n1, n2;
     StringBuilder builder;
     UPred uPred;
@@ -2524,7 +2533,7 @@ public class FuzzSMT {
     assert (!nodes.isEmpty());
     assert (boolNodes != null);
     assert (minRefs > 0);
-    
+
     switch (compMode) {
       case OFF:
         assert (uPreds.size() > 0);
@@ -2610,15 +2619,15 @@ public class FuzzSMT {
     return boolNodes.size() - oldSize;
   }
 
-  private static int generateUPredLayer (Random r, List<SMTNode> nodes, 
-                                         List<SMTNode> boolNodes, 
+  private static int generateUPredLayer (Random r, List<SMTNode> nodes,
+                                         List<SMTNode> boolNodes,
                                          List<UPred> preds, int minRefs) {
 
     int oldSize, sizePreds, sizeOperandTypes;
     String name;
-    HashMap<SMTNode, Integer> todoNodes; 
+    HashMap<SMTNode, Integer> todoNodes;
     SMTNode []todoNodesArray;
-    HashSet<UPred> todoPreds; 
+    HashSet<UPred> todoPreds;
     UPred pred;
     Signature sig;
     List<SMTType> operandTypes;
@@ -2794,7 +2803,7 @@ public class FuzzSMT {
       return 0;
 
     name = "e" + SMTNode.getNodeCtr();
-    builder = new StringBuilder(); 
+    builder = new StringBuilder();
     builder.append ("(let ((");
     builder.append (name);
     builder.append (" \n");
@@ -2830,7 +2839,7 @@ public class FuzzSMT {
   }
 
 
-  private static int generateBooleanCNF (Random r, List<SMTNode> nodes, 
+  private static int generateBooleanCNF (Random r, List<SMTNode> nodes,
                                          double factor){
     SMTNode cur;
     String name;
@@ -2877,7 +2886,7 @@ public class FuzzSMT {
     return 1;
   }
 
-  private static int addBVDivGuards (List<SMTNode> root, 
+  private static int addBVDivGuards (List<SMTNode> root,
                                      HashMap<SMTNode, SMTNodeKind> guardsMap){
     int generated = 0;
     int bw;
@@ -2929,7 +2938,7 @@ public class FuzzSMT {
         cur = new SMTNode (BoolType.boolType, name);
         generated++;
       }
-    } 
+    }
     System.out.print (builder.toString());
 
     root.clear();
@@ -2938,7 +2947,7 @@ public class FuzzSMT {
     return generated;
   }
 
-  static int addArrayExt (Random r, List<SMTNode> arrays, 
+  static int addArrayExt (Random r, List<SMTNode> arrays,
                           List<SMTNode> boolNodes, int numExt){
     int oldSize, sizeArrays;
     SMTNode a1, a2;
@@ -2977,11 +2986,11 @@ public class FuzzSMT {
     return boolNodes.size() - oldSize;
   }
 
-  private static int generateQFormulasUF (Random r, SMTType type, 
-                                           List<UFunc> uFuncs, 
-                                           List<UPred> uPreds, 
-                                           int numQFormulas, int minQVars, 
-                                           int maxQVars, int minQNestings, 
+  private static int generateQFormulasUF (Random r, SMTType type,
+                                           List<UFunc> uFuncs,
+                                           List<UPred> uPreds,
+                                           int numQFormulas, int minQVars,
+                                           int maxQVars, int minQNestings,
                                            int maxQNestings, boolean onlyEqComp,
                                            int minRefs) {
 
@@ -2997,7 +3006,7 @@ public class FuzzSMT {
     String name, s1, s2, s3;
     String []qVarNamesArray;
     String []boolNamesArray;
-    HashMap<String, Integer> todoQVarNames; 
+    HashMap<String, Integer> todoQVarNames;
     UFunc uFunc;
     UPred uPred;
     UFunc [] uFuncsArray = null;
@@ -3046,13 +3055,13 @@ public class FuzzSMT {
     for (int i = 0; i < numQFormulas; i++) {
       assert (todoQVarNames.isEmpty());
       assert (boolNames.isEmpty());
-      numQNestings = selectRandValRange (r, minQNestings, maxQNestings); 
+      numQNestings = selectRandValRange (r, minQNestings, maxQNestings);
       builder.append ("(and \n");
       and_pars++;
       pars = 0;
       for (int j = 0; j <= numQNestings; j++) {
         pars++;
-        numQVars = selectRandValRange (r, minQVars, maxQVars); 
+        numQVars = selectRandValRange (r, minQVars, maxQVars);
         if (r.nextBoolean())
           builder.append ("(forall (");
         else
@@ -3184,6 +3193,11 @@ public class FuzzSMT {
 /* Main method                                                                */
 /*----------------------------------------------------------------------------*/
 
+  private enum CheckSatMode {
+    CLASSIC,
+    ASSUMPTIONS
+  }
+
   private enum BooleanLayerKind {
     AND,
     OR,
@@ -3215,7 +3229,7 @@ public class FuzzSMT {
     System.exit (0);
   }
 
-  private static int parseIntOption (String []args, int pos, int minVal, 
+  private static int parseIntOption (String []args, int pos, int minVal,
                                      String errorMsg) {
     int result = 0;
 
@@ -3235,7 +3249,7 @@ public class FuzzSMT {
     return result;
   }
 
-  private static long parseLongOption (String []args, int pos, long minVal, 
+  private static long parseLongOption (String []args, int pos, long minVal,
                                        String errorMsg) {
     long result = 0l;
 
@@ -3255,7 +3269,7 @@ public class FuzzSMT {
     return result;
   }
 
-  private static double parseDoubleOption (String []args, int pos, double minVal, 
+  private static double parseDoubleOption (String []args, int pos, double minVal,
                                            String errorMsg) {
     double result = 0.0;
 
@@ -3279,22 +3293,22 @@ public class FuzzSMT {
 
   private static final String version = "0.2";
 
-  private static final String usage = 
+  private static final String usage =
 "********************************************************************************\n" +
 "*              FuzzSMT " + version + "                                                     *\n"  +
 "*              Fuzzing Tool for SMT-LIB 1.2 Benchmarks                         *\n" +
-"*              written by Robert Daniel Brummayer, 2009                        *\n" + 
+"*              written by Robert Daniel Brummayer, 2009                        *\n" +
 "********************************************************************************\n" +
 "\n" +
 "usage: fuzzsmt <logic> [option...]\n\n" +
-"  <logic> is one of the following:\n" + 
-"  QF_A, QF_AUFBV, QF_AUFLIA, QF_AX, QF_BV, QF_IDL, QF_LIA, QF_LRA,\n" + 
+"  <logic> is one of the following:\n" +
+"  QF_A, QF_AUFBV, QF_AUFLIA, QF_AX, QF_BV, QF_IDL, QF_LIA, QF_LRA,\n" +
 "  QF_NIA, QF_NRA, QF_RDL, QF_UF, QF_UFBV, QF_UFIDL, QF_UFLIA, QF_UFLRA,\n" +
-"  QF_UFNIA, QF_UFNRA, QF_UFRDL, AUFLIA, AUFLIRA and AUFNIRA.\n" + 
+"  QF_UFNIA, QF_UFNRA, QF_UFRDL, AUFLIA, AUFLIRA and AUFNIRA.\n" +
 "\n" +
 "  for details about SMT see: www.smtlib.org\n" +
 "\n" +
-"  general options:\n\n" + 
+"  general options:\n\n" +
 "  -h                   print usage information and exit\n" +
 "  -V                   print version and exit\n" +
 "  -seed <seed>         initialize random number generator with <seed>\n" +
@@ -3347,7 +3361,7 @@ public class FuzzSMT {
 "  -Ma <args>           set max number of arguments to <args>  (default  3)\n" +
 "  -g                   do not guard BVUDIV BVSDIV BVUREM BVSREM BVSMOD\n"+
 "  -n                   do not use BVUDIV BVSDIV BVUREM BVSREM BVSMOD\n" +
-"  -ref <refs>          set min number of references for terms\n" + 
+"  -ref <refs>          set min number of references for terms\n" +
 "                       in input and main layer to <refs>      (default  1)\n" +
 "\n" +
 "QF_AUFLIA and AUFLIA options:\n" +
@@ -3375,7 +3389,7 @@ public class FuzzSMT {
 "  -Mbw <bw>            set max bit-width to <bw>              (default  4)\n" +
 "                       bit-width is used to\n" +
 "                       restrict the constants\n" +
-"  -ref <refs>          set min number of references for terms\n" + 
+"  -ref <refs>          set min number of references for terms\n" +
 "                       in input and main layer to <refs>      (default  1)\n" +
 " AUFLIA only:\n" +
 "  -mqfi <qf>           use min <qf> quantified formulas over\n" +
@@ -3463,7 +3477,7 @@ public class FuzzSMT {
 "                       level to <qn>                          (default  0)\n" +
 "  -Mqn <qn>            set maximum quantifier nesting\n" +
 "                       level to <qn>                          (default  1)\n" +
-"  -ref <refs>          set min number of references for terms\n" + 
+"  -ref <refs>          set min number of references for terms\n" +
 "                       in input and main layer to <refs>      (default  1)\n" +
 "\n" +
 "QF_BV, QF_BVEQ, and QF_UFBV options:\n" +
@@ -3494,7 +3508,7 @@ public class FuzzSMT {
 "  -Mbw <bw>            set max bit-width to <bw>              (default  4)\n" +
 "                       bit-width is used to\n" +
 "                       restrict the constants\n" +
-"  -ref <refs>          set minimum number of references\n" +  
+"  -ref <refs>          set minimum number of references\n" +
 "                       for vars and consts to <refs>          (default  5)\n" +
 " QF_UFIDL and QF_UFRDL only:\n" +
 "  -mf <funcs>          use min <funcs> uninterpreted funcs    (default  1)\n" +
@@ -3504,7 +3518,7 @@ public class FuzzSMT {
 "  -ma <args>           set min number of arguments to <args>  (default  1)\n" +
 "  -Ma <args>           set max number of arguments to <args>  (default  3)\n" +
 "\n" +
-"QF_LIA, QF_UFLIA, QF_NIA, QF_UFNIA, QF_LRA,\n" +  
+"QF_LIA, QF_UFLIA, QF_NIA, QF_UFNIA, QF_LRA,\n" +
 "QF_UFLRA, QF_NRA and QF_UFNRA options:\n" +
 "  -mv <vars>           use min <vars> variables               (default  1)\n" +
 "  -Mv <vars>           use max <vars> variables               (default  3)\n" +
@@ -3516,7 +3530,7 @@ public class FuzzSMT {
 "  -Mbw <bw>            set max bit-width to <bw>              (default  4)\n" +
 "                       bit-width is used to\n" +
 "                       restrict the constants\n" +
-"  -ref <refs>          set minimum number of references\n" +  
+"  -ref <refs>          set minimum number of references\n" +
 "                       for vars and consts to <refs>          (default  1)\n" +
 " QF_UFLIA, QF_UFNIA, QF_UFLRA and QF_UFNRA only:\n" +
 "  -mf <funcs>          use min <funcs> uninterpreted funcs    (default  1)\n" +
@@ -3535,7 +3549,7 @@ public class FuzzSMT {
 "  -mp <preds>          use at least <preds> predicates        (default  5)\n" +
 "  -ma <args>           set min number of arguments to <args>  (default  1)\n" +
 "  -Ma <args>           set max number of arguments to <args>  (default  3)\n" +
-"  -ref <refs>          set min number of references for terms\n" + 
+"  -ref <refs>          set min number of references for terms\n" +
 "                       in input and main layer to <refs>      (default  1)\n" +
 "\n";
 
@@ -3662,17 +3676,18 @@ public class FuzzSMT {
     int numUPredsArray2 = 0;
     boolean linear = true;
     double factor = 1.0;
+    CheckSatMode checkSatMode = CheckSatMode.CLASSIC;
     RelCompMode compModeArray = RelCompMode.OFF;
     RelCompMode compModeArray1 = RelCompMode.OFF;
     RelCompMode compModeArray2 = RelCompMode.OFF;
     BVDivMode bvDivMode = BVDivMode.GUARD;
-    
+
     StringBuilder builder;
     ArrayList<SMTNode> boolNodes = null;
     HashMap<SMTNode, SMTNodeKind> BVDivGuards = null;
     BooleanLayerKind booleanLayerKind = BooleanLayerKind.RANDOM;
     boolean enableITELayer = true;
-    
+
     if (args.length == 0) {
       System.out.println (usage);
       System.exit (0);
@@ -3680,7 +3695,7 @@ public class FuzzSMT {
 
     if (args[0].equals ("-V"))
       printVersionAndExit ();
-    
+
     if (args[0].equals ("-h"))
       printHelpAndExit ();
 
@@ -3913,6 +3928,8 @@ public class FuzzSMT {
           printHelpAndExit ();
         } else if (arg.equals("-V")) {
           printVersionAndExit ();
+        } else if (arg.equals("-assumptions")) {
+          checkSatMode = CheckSatMode.ASSUMPTIONS;
         } else if (arg.equals("-g")) {
           bvDivMode = BVDivMode.FULL;
         } else if (arg.equals("-n")) {
@@ -4098,7 +4115,7 @@ public class FuzzSMT {
           minBW = parseIntOption (args, i++, 1, "invalid minimum bit-width");
         } else if (arg.equals("-Mbw")) {
           maxBW = parseIntOption (args, i++, 1, "invalid maximum bit-width");
-        } else { 
+        } else {
           printErrAndExit ("invalid option: " + arg);
         }
       } else {
@@ -4175,33 +4192,33 @@ public class FuzzSMT {
         checkMinMax (minNumVarsInt, maxNumVarsInt, "integer variables");
         checkMinMax (minNumVarsReal, maxNumVarsReal, "real variables");
         checkMinMax (minNumConstsInt, maxNumConstsInt, "integer constants");
-        checkMinMax (minNumConstsIntAsReal, maxNumConstsIntAsReal, 
+        checkMinMax (minNumConstsIntAsReal, maxNumConstsIntAsReal,
                      "integer constants in real context");
         checkMinMax (minNumArrays1, maxNumArrays1, "arrays of type array1");
         checkMinMax (minNumArrays2, maxNumArrays2, "arrays of type array2");
-        checkMinMax (minNumReadsArray1, maxNumReadsArray1, 
+        checkMinMax (minNumReadsArray1, maxNumReadsArray1,
                      "reads on arrays of type array1");
         checkMinMax (minNumReadsArray2, maxNumReadsArray2,
                      "reads on arrays of type array2");
-        checkMinMax (minNumWritesArray1, maxNumWritesArray1, 
+        checkMinMax (minNumWritesArray1, maxNumWritesArray1,
                      "writes on arrays of type array1");
-        checkMinMax (minNumWritesArray2, maxNumWritesArray2, 
+        checkMinMax (minNumWritesArray2, maxNumWritesArray2,
                      "writes on arrays of type array2");
-        checkMinMax (minNumUFuncsInt, maxNumUFuncsInt, 
+        checkMinMax (minNumUFuncsInt, maxNumUFuncsInt,
                      "uninterpreted integer functions");
-        checkMinMax (minNumUFuncsReal, maxNumUFuncsReal, 
+        checkMinMax (minNumUFuncsReal, maxNumUFuncsReal,
                      "uninterpreted real functions");
-        checkMinMax (minNumUFuncsArray1, maxNumUFuncsArray1, 
+        checkMinMax (minNumUFuncsArray1, maxNumUFuncsArray1,
                      "uninterpreted array1 functions");
-        checkMinMax (minNumUFuncsArray2, maxNumUFuncsArray2, 
+        checkMinMax (minNumUFuncsArray2, maxNumUFuncsArray2,
                      "uninterpreted array2 functions");
-        checkMinMax (minNumUPredsInt, maxNumUPredsInt, 
+        checkMinMax (minNumUPredsInt, maxNumUPredsInt,
                      "uninterpreted integer predicates");
-        checkMinMax (minNumUPredsReal, maxNumUPredsReal, 
+        checkMinMax (minNumUPredsReal, maxNumUPredsReal,
                      "uninterpreted real predicates");
-        checkMinMax (minNumUPredsArray1, maxNumUPredsArray1, 
+        checkMinMax (minNumUPredsArray1, maxNumUPredsArray1,
                      "uninterpreted array1 predicates");
-        checkMinMax (minNumUPredsArray2, maxNumUPredsArray2, 
+        checkMinMax (minNumUPredsArray2, maxNumUPredsArray2,
                      "uninterpreted array2 predicates");
         checkMinMax (minArgs, maxArgs, "arguments");
         checkMinMax (minNumQFormulasInt, maxNumQFormulasInt,
@@ -4215,31 +4232,31 @@ public class FuzzSMT {
         numVarsInt = selectRandValRange (r, minNumVarsInt, maxNumVarsInt);
         numVarsReal = selectRandValRange (r, minNumVarsReal, maxNumVarsReal);
         numConstsInt = selectRandValRange (r, minNumConstsInt, maxNumConstsInt);
-        numConstsIntAsReal = selectRandValRange (r, minNumConstsIntAsReal, 
+        numConstsIntAsReal = selectRandValRange (r, minNumConstsIntAsReal,
                                                  maxNumConstsIntAsReal);
         numArrays1 = selectRandValRange (r, minNumArrays1, maxNumArrays1);
         numArrays2 = selectRandValRange (r, minNumArrays2, maxNumArrays2);
-        numReadsArray1 = selectRandValRange (r, minNumReadsArray1, 
+        numReadsArray1 = selectRandValRange (r, minNumReadsArray1,
                                              maxNumReadsArray1);
-        numReadsArray2 = selectRandValRange (r, minNumReadsArray2, 
+        numReadsArray2 = selectRandValRange (r, minNumReadsArray2,
                                              maxNumReadsArray2);
-        numWritesArray1 = selectRandValRange (r, minNumWritesArray1, 
+        numWritesArray1 = selectRandValRange (r, minNumWritesArray1,
                                               maxNumWritesArray1);
-        numWritesArray2 = selectRandValRange (r, minNumWritesArray2, 
+        numWritesArray2 = selectRandValRange (r, minNumWritesArray2,
                                               maxNumWritesArray2);
         numUFuncsInt = selectRandValRange (r, minNumUFuncsInt, maxNumUFuncsInt);
-        numUFuncsReal = selectRandValRange (r, minNumUFuncsReal, 
+        numUFuncsReal = selectRandValRange (r, minNumUFuncsReal,
                                             maxNumUFuncsReal);
-        numUFuncsArray1 = selectRandValRange (r, minNumUFuncsArray1, 
+        numUFuncsArray1 = selectRandValRange (r, minNumUFuncsArray1,
                                               maxNumUFuncsArray1);
-        numUFuncsArray2 = selectRandValRange (r, minNumUFuncsArray2, 
+        numUFuncsArray2 = selectRandValRange (r, minNumUFuncsArray2,
                                               maxNumUFuncsArray2);
         numUPredsInt = selectRandValRange (r, minNumUPredsInt, maxNumUPredsInt);
-        numUPredsReal = selectRandValRange (r, minNumUPredsReal, 
+        numUPredsReal = selectRandValRange (r, minNumUPredsReal,
                                             maxNumUPredsReal);
-        numUPredsArray1 = selectRandValRange (r, minNumUPredsArray1, 
+        numUPredsArray1 = selectRandValRange (r, minNumUPredsArray1,
                                               maxNumUPredsArray1);
-        numUPredsArray2 = selectRandValRange (r, minNumUPredsArray2, 
+        numUPredsArray2 = selectRandValRange (r, minNumUPredsArray2,
                                               maxNumUPredsArray2);
         numQFormulasInt = selectRandValRange (r, minNumQFormulasInt,
                                               maxNumQFormulasInt);
@@ -4446,13 +4463,13 @@ public class FuzzSMT {
         checkMinMax (minNumArrays, maxNumArrays, "arrays");
         checkMinMax (minNumReads, maxNumReads, "reads");
         checkMinMax (minNumWrites, maxNumWrites, "writes");
-        checkMinMax (minNumUFuncsInt, maxNumUFuncsInt, 
+        checkMinMax (minNumUFuncsInt, maxNumUFuncsInt,
                      "uninterpreted int functions");
-        checkMinMax (minNumUFuncsArray, maxNumUFuncsArray, 
+        checkMinMax (minNumUFuncsArray, maxNumUFuncsArray,
                      "uninterpreted array functions");
-        checkMinMax (minNumUPredsInt, maxNumUPredsInt, 
+        checkMinMax (minNumUPredsInt, maxNumUPredsInt,
                      "uninterpreted int predicates");
-        checkMinMax (minNumUPredsArray, maxNumUPredsArray, 
+        checkMinMax (minNumUPredsArray, maxNumUPredsArray,
                      "uninterpreted array predicates");
         checkMinMax (minArgs, maxArgs, "arguments");
         numVars = selectRandValRange (r, minNumVars, maxNumVars);
@@ -4461,14 +4478,14 @@ public class FuzzSMT {
         numReads = selectRandValRange (r, minNumReads, maxNumReads);
         numWrites = selectRandValRange (r, minNumWrites, maxNumWrites);
         numUFuncsInt = selectRandValRange (r, minNumUFuncsInt, maxNumUFuncsInt);
-        numUFuncsArray = selectRandValRange (r, minNumUFuncsArray, 
+        numUFuncsArray = selectRandValRange (r, minNumUFuncsArray,
                                              maxNumUFuncsArray);
         numUPredsInt = selectRandValRange (r, minNumUPredsInt, maxNumUPredsInt);
-        numUPredsArray = selectRandValRange (r, minNumUPredsArray, 
+        numUPredsArray = selectRandValRange (r, minNumUPredsArray,
                                              maxNumUPredsArray);
         break;
     }
-    
+
 
     boolNodes = new ArrayList<SMTNode>();
     assert (r != null);
@@ -4479,7 +4496,7 @@ public class FuzzSMT {
     System.out.print ("(set-info :status unknown)\n");
     System.out.print ("(set-logic " + logic.toSMT2String() + ")\n");
     switch (logic) {
-      case QF_BOOL:    	
+      case QF_BOOL:
     	  generateBoolVars (boolNodes, numVars);
       	System.out.print ("(assert ");
     	break;
@@ -4493,7 +4510,7 @@ public class FuzzSMT {
         generateUPredsBV (r, uPreds, numUPreds, minArgs, maxArgs, minBW, maxBW);
         generateBVVars (r, bvNodes, numVars, minBW, maxBW);
         System.out.print ("(assert ");
-        pars += generateBVConsts (r, bvNodes, numConsts, minBW, maxBW); 
+        pars += generateBVConsts (r, bvNodes, numConsts, minBW, maxBW);
         pars += generateBVLayer (r, bvNodes, minRefs, minBW, maxBW, bvDivMode,
                                  BVDivGuards, false, uFuncs, uPreds);
         pars += generateBVPredicateLayer (r, bvNodes, boolNodes, minRefs,
@@ -4505,8 +4522,8 @@ public class FuzzSMT {
         ArrayList<UPred> uPreds = new ArrayList<UPred>();
         generateBVVars (r, bvNodes, numVars, minBW, maxBW);
         System.out.print ("(assert ");
-        pars += generateBVConsts (r, bvNodes, numConsts, minBW, maxBW); 
-        pars += generateBVEQLayer (r, bvNodes, minRefs, minBW, maxBW);
+        pars += generateBVConsts (r, bvNodes, numConsts, minBW, maxBW);
+        pars += generateBVEQLayer (r, bvNodes, minRefs, minBW, maxBW, enableITELayer);
         pars += generateBVEQPredicateLayer (r, bvNodes, boolNodes, minRefs);
       }
       break;
@@ -4524,29 +4541,29 @@ public class FuzzSMT {
         generateBVArrayVars (r, arrayNodes, numArrays, minBW, maxBW);
         System.out.print ("(assert ");
 
-        /* half of extensional array equalities are encoded intot bit-vector, 
+        /* half of extensional array equalities are encoded intot bit-vector,
          * the other half into the boolean part */
         if (numExtBool > 0) {
           numExtBV = (numExtBool >>> 1) + (numExtBool & 1);
           numExtBool >>>= 1;
         }
 
-        pars += generateBVConsts (r, bvNodes, numConsts, minBW, maxBW); 
+        pars += generateBVConsts (r, bvNodes, numConsts, minBW, maxBW);
         pars += generateBVLayer (r, bvNodes, minRefs, minBW, maxBW, bvDivMode,
                                  BVDivGuards, true, uFuncs, uPreds);
         /* interleave creation of layers to ensure that
-         * numReads are also used as read indices, numWrites indices 
+         * numReads are also used as read indices, numWrites indices
          * and write values.
          * Moreover, equalities between numArrays are encoded as bit-vectors
          * and integrated into the bit-vector layer. Therefore, they
          * may also contribute to read indices, write indices and write values.
          */
         while (numWrites > 0 || numReads > 0 || numExtBV > 0) {
-          pars += generateBVWriteLayer (r, arrayNodes, bvNodes, 
+          pars += generateBVWriteLayer (r, arrayNodes, bvNodes,
                                         (numWrites >>> 1) + (numWrites & 1));
-          pars += generateBVArrayExtBVLayer (r, arrayNodes, bvNodes, 
+          pars += generateBVArrayExtBVLayer (r, arrayNodes, bvNodes,
                                              (numExtBV >>> 1) + (numExtBV & 1));
-          pars += generateBVReadLayer (r, arrayNodes, bvNodes, 
+          pars += generateBVReadLayer (r, arrayNodes, bvNodes,
                                        (numReads >>> 1) + (numReads & 1));
           numWrites >>>= 1;
           numExtBV >>>= 1;
@@ -4566,10 +4583,10 @@ public class FuzzSMT {
         pars += addArrayExt (r, arrayNodes, boolNodes, numExtBool);
       }
       break;
-      case QF_A: 
+      case QF_A:
       case QF_AX: {
         int numWritesH, numReadsH;
-        SMTType arrayType = ArrayType.arrayType; 
+        SMTType arrayType = ArrayType.arrayType;
         SMTType indexType = new UType ("Index");
         SMTType elementType = new UType ("Element");
 	System.out.print("(declare-sort Index 0)\n");
@@ -4596,9 +4613,9 @@ public class FuzzSMT {
         if (logic == SMTLogic.QF_AX)
           pars += generateComparisonLayer (r, arrays, boolNodes, null, minRefs,
                                            RelCompMode.EQ, false);
-        pars += generateComparisonLayer (r, indices, boolNodes, null, minRefs, 
+        pars += generateComparisonLayer (r, indices, boolNodes, null, minRefs,
                                          RelCompMode.EQ, false);
-        pars += generateComparisonLayer (r, elements, boolNodes, null, minRefs, 
+        pars += generateComparisonLayer (r, elements, boolNodes, null, minRefs,
                                          RelCompMode.EQ, false);
         /* generate ITE Layer */
         pars += generateITELayer (r, arrays, boolNodes, minRefs);
@@ -4606,7 +4623,7 @@ public class FuzzSMT {
         pars += generateITELayer (r, elements, boolNodes, minRefs);
         /* generate second write and read layer */
         while (numWritesH > 0 || numReadsH > 0) {
-          pars += generateWriteLayer (r, arrays, indices, elements, arrayType, 
+          pars += generateWriteLayer (r, arrays, indices, elements, arrayType,
                                       (numWritesH >>> 1) + (numWritesH & 1));
           pars += generateReadLayer (r, arrays, indices, elements, elementType,
                                      (numReadsH >>> 1) + (numReadsH & 1));
@@ -4614,15 +4631,15 @@ public class FuzzSMT {
           numReadsH >>>= 1;
         }
         if (logic == SMTLogic.QF_AX)
-          pars += generateComparisonLayer (r, arrays, boolNodes, null, minRefs, 
+          pars += generateComparisonLayer (r, arrays, boolNodes, null, minRefs,
                                            RelCompMode.EQ, false);
-        pars += generateComparisonLayer (r, indices, boolNodes, null, minRefs, 
+        pars += generateComparisonLayer (r, indices, boolNodes, null, minRefs,
                                          RelCompMode.EQ, false);
-        pars += generateComparisonLayer (r, elements, boolNodes, null, minRefs, 
+        pars += generateComparisonLayer (r, elements, boolNodes, null, minRefs,
                                          RelCompMode.EQ, false);
       }
       break;
-      case AUFLIA: 
+      case AUFLIA:
       case QF_AUFLIA: {
         int numWritesH, numReadsH;
         ArrayList<SMTType> sortsInt = new ArrayList<SMTType>();
@@ -4641,17 +4658,17 @@ public class FuzzSMT {
         sortsArray.add (ArrayType.arrayType);
 
         if (numUFuncsInt > 0)
-          generateUFuncs (r, sortsInt, uFuncsInt, numUFuncsInt, 
+          generateUFuncs (r, sortsInt, uFuncsInt, numUFuncsInt,
                           minArgs, maxArgs);
         if (numUFuncsArray > 0)
-          generateUFuncs (r, sortsArray, uFuncsArray, numUFuncsArray, 
+          generateUFuncs (r, sortsArray, uFuncsArray, numUFuncsArray,
                           minArgs, maxArgs);
- 
+
         if (numUPredsInt > 0)
-          generateUPreds (r, sortsInt, uPredsInt, numUPredsInt, 
+          generateUPreds (r, sortsInt, uPredsInt, numUPredsInt,
                           minArgs, maxArgs);
         if (numUPredsArray > 0)
-          generateUPreds (r, sortsArray, uPredsArray, numUPredsArray, 
+          generateUPreds (r, sortsArray, uPredsArray, numUPredsArray,
                           minArgs, maxArgs);
 
         generateIntVars (intNodes, numVars);
@@ -4659,12 +4676,12 @@ public class FuzzSMT {
         System.out.print ("(assert ");
         if (numQFormulasInt > 0 && (numUFuncsInt > 0 || numUPredsInt > 0))
 	    pars+=generateQFormulasUF (r, IntType.intType, uFuncsInt, uPredsInt,
-                               numQFormulasInt, minQVars, maxQVars, 
+                               numQFormulasInt, minQVars, maxQVars,
                                minQNestings, maxQNestings, false, minRefs);
         if (numQFormulasArray > 0 && (numUFuncsArray > 0 || numUPredsArray > 0))
-	    pars+=generateQFormulasUF (r, ArrayType.arrayType, uFuncsArray, 
-                               uPredsArray, numQFormulasArray, minQVars, 
-                               maxQVars, minQNestings, maxQNestings, true, 
+	    pars+=generateQFormulasUF (r, ArrayType.arrayType, uFuncsArray,
+                               uPredsArray, numQFormulasArray, minQVars,
+                               maxQVars, minQNestings, maxQNestings, true,
                                minRefs);
 
         pars += generateIntConsts (r, intConsts, numConsts, maxBW);
@@ -4675,53 +4692,53 @@ public class FuzzSMT {
         pars += generateIntLayer (r, intNodes, intConsts, uFuncsInt, uPredsInt,
                                   true, minRefs, true);
         while (numWrites > 0 | numReads > 0){
-          pars += generateWriteLayer (r, arrays, intNodes, intNodes, 
-                                      ArrayType.arrayType, 
+          pars += generateWriteLayer (r, arrays, intNodes, intNodes,
+                                      ArrayType.arrayType,
                                       (numWrites >>> 1) + (numWrites & 1));
           pars += generateReadLayer (r, arrays, intNodes, intNodes,
-                                     IntType.intType, 
+                                     IntType.intType,
                                      (numReads >>> 1) + (numReads & 1));
           numWrites >>>= 1;
           numReads >>>= 1;
         }
 
         if (numUFuncsArray > 0)
-          pars += generateUTermLayer (r, sortsArray, arrays, uFuncsArray, 
+          pars += generateUTermLayer (r, sortsArray, arrays, uFuncsArray,
                                       minRefs);
         if (compModeArray == RelCompMode.EQ || numUPredsArray > 0)
-          pars += generateComparisonLayer (r, arrays, boolNodes, uPredsArray, 
+          pars += generateComparisonLayer (r, arrays, boolNodes, uPredsArray,
                                            minRefs, compModeArray, true);
-        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt, 
+        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt,
                                          minRefs, RelCompMode.FULL, true);
         pars += generateITELayer (r, arrays, boolNodes, minRefs);
         pars += generateITELayer (r, intNodes, boolNodes, minRefs);
         /* generate second write and read layer */
         while (numWritesH > 0 || numReadsH > 0) {
           pars += generateWriteLayer (r, arrays, intNodes, intNodes,
-                                      ArrayType.arrayType, 
+                                      ArrayType.arrayType,
                                       (numWritesH >>> 1) + (numWritesH & 1));
           pars += generateReadLayer (r, arrays, intNodes, intNodes,
-                                     IntType.intType, 
+                                     IntType.intType,
                                      (numReadsH >>> 1) + (numReadsH & 1));
           numWritesH >>>= 1;
           numReadsH >>>= 1;
         }
 
         if (numUFuncsArray > 0)
-          pars += generateUTermLayer (r, sortsArray, arrays, uFuncsArray, 
+          pars += generateUTermLayer (r, sortsArray, arrays, uFuncsArray,
                                       minRefs);
         pars += generateIntLayer (r, intNodes, intConsts, uFuncsInt, uPredsInt,
                                   true, minRefs, true);
         if (compModeArray == RelCompMode.EQ || numUPredsArray > 0)
-          pars += generateComparisonLayer (r, arrays, boolNodes, uPredsArray, 
+          pars += generateComparisonLayer (r, arrays, boolNodes, uPredsArray,
                                            minRefs, compModeArray, true);
-        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt, 
+        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt,
                                          minRefs, RelCompMode.FULL, true);
       }
       break;
       case AUFLIRA:
       case AUFNIRA: {
-        int numWritesArray1H, numWritesArray2H; 
+        int numWritesArray1H, numWritesArray2H;
         int numReadsArray1H, numReadsArray2H;
         HashSet<SMTNode> zeroConsts = new HashSet<SMTNode>();
         ArrayList<SMTType> sortsInt = new ArrayList<SMTType>();
@@ -4751,29 +4768,29 @@ public class FuzzSMT {
         sortsArray2.add (Array2Type.array2Type);
 
         if (numUFuncsInt > 0)
-          generateUFuncs (r, sortsInt, uFuncsInt, numUFuncsInt, 
+          generateUFuncs (r, sortsInt, uFuncsInt, numUFuncsInt,
                           minArgs, maxArgs);
         if (numUFuncsReal > 0)
-          generateUFuncs (r, sortsReal, uFuncsReal, numUFuncsReal, 
+          generateUFuncs (r, sortsReal, uFuncsReal, numUFuncsReal,
                           minArgs, maxArgs);
         if (numUFuncsArray1 > 0)
-          generateUFuncs (r, sortsArray1, uFuncsArray1, numUFuncsArray1, 
+          generateUFuncs (r, sortsArray1, uFuncsArray1, numUFuncsArray1,
                           minArgs, maxArgs);
         if (numUFuncsArray2 > 0)
-          generateUFuncs (r, sortsArray2, uFuncsArray2, numUFuncsArray2, 
+          generateUFuncs (r, sortsArray2, uFuncsArray2, numUFuncsArray2,
                           minArgs, maxArgs);
- 
+
         if (numUPredsInt > 0)
-          generateUPreds (r, sortsInt, uPredsInt, numUPredsInt, 
+          generateUPreds (r, sortsInt, uPredsInt, numUPredsInt,
                           minArgs, maxArgs);
         if (numUPredsReal > 0)
-          generateUPreds (r, sortsReal, uPredsReal, numUPredsReal, 
+          generateUPreds (r, sortsReal, uPredsReal, numUPredsReal,
                           minArgs, maxArgs);
         if (numUPredsArray1 > 0)
-          generateUPreds (r, sortsArray1, uPredsArray1, numUPredsArray1, 
+          generateUPreds (r, sortsArray1, uPredsArray1, numUPredsArray1,
                           minArgs, maxArgs);
         if (numUPredsArray2 > 0)
-          generateUPreds (r, sortsArray2, uPredsArray2, numUPredsArray2, 
+          generateUPreds (r, sortsArray2, uPredsArray2, numUPredsArray2,
                           minArgs, maxArgs);
 
         generateIntVars (intNodes, numVarsInt);
@@ -4784,33 +4801,33 @@ public class FuzzSMT {
         System.out.print ("(assert ");
         if (numQFormulasInt > 0 && (numUFuncsInt > 0 || numUPredsInt > 0))
 	    pars+=generateQFormulasUF (r, IntType.intType, uFuncsInt, uPredsInt,
-                               numQFormulasInt, minQVars, maxQVars, 
+                               numQFormulasInt, minQVars, maxQVars,
                                minQNestings, maxQNestings, false, minRefs);
         if (numQFormulasReal > 0 && (numUFuncsReal > 0 || numUPredsReal > 0))
 	    pars+=generateQFormulasUF (r, RealType.realType, uFuncsReal, uPredsReal,
-                               numQFormulasReal, minQVars, maxQVars, 
+                               numQFormulasReal, minQVars, maxQVars,
                                minQNestings, maxQNestings, false, minRefs);
-        if (numQFormulasArray1 > 0 
+        if (numQFormulasArray1 > 0
             && (numUFuncsArray1 > 0 || numUPredsArray1 > 0))
-          pars+=generateQFormulasUF (r, Array1Type.array1Type, uFuncsArray1, 
-                               uPredsArray1, numQFormulasArray1, minQVars, 
-                               maxQVars, minQNestings, maxQNestings, true, 
+          pars+=generateQFormulasUF (r, Array1Type.array1Type, uFuncsArray1,
+                               uPredsArray1, numQFormulasArray1, minQVars,
+                               maxQVars, minQNestings, maxQNestings, true,
                                minRefs);
-        if (numQFormulasArray2 > 0 
+        if (numQFormulasArray2 > 0
             && (numUFuncsArray2 > 0 || numUPredsArray2 > 0))
-          pars+=generateQFormulasUF (r, Array2Type.array2Type, uFuncsArray2, 
-                               uPredsArray2, numQFormulasArray2, minQVars, 
-                               maxQVars, minQNestings, maxQNestings, true, 
+          pars+=generateQFormulasUF (r, Array2Type.array2Type, uFuncsArray2,
+                               uPredsArray2, numQFormulasArray2, minQVars,
+                               maxQVars, minQNestings, maxQNestings, true,
                                minRefs);
 
         pars += generateIntConsts (r, intConsts, numConstsInt, maxBW);
         pars += generateRealConstsNotFilledZero (r, intConstsAsReal, zeroConsts,
-                                                 numConstsIntAsReal, maxBW, 
+                                                 numConstsIntAsReal, maxBW,
                                                  true);
         pars += generateIntLayer (r, intNodes, intConsts, uFuncsInt, uPredsInt,
                                   true, minRefs, true);
-        pars += generateRealLayer (r, realNodes, intConstsAsReal, zeroConsts, 
-                                   uFuncsReal, uPredsReal, linear, true, 
+        pars += generateRealLayer (r, realNodes, intConstsAsReal, zeroConsts,
+                                   uFuncsReal, uPredsReal, linear, true,
                                    minRefs, false);
 
         numWritesArray1H = (numWritesArray1 >>> 1) + (numWritesArray1 & 1);
@@ -4824,21 +4841,21 @@ public class FuzzSMT {
         /* interleave both array phases */
         while (numWritesArray1 > 0 || numReadsArray1 > 0 ||
                numWritesArray2 > 0 || numReadsArray2 > 0){
-          pars += generateWriteLayer (r, arrays1, intNodes, realNodes, 
-                                      Array1Type.array1Type, 
-                                      (numWritesArray1 >>> 1) + 
+          pars += generateWriteLayer (r, arrays1, intNodes, realNodes,
+                                      Array1Type.array1Type,
+                                      (numWritesArray1 >>> 1) +
                                       (numWritesArray1 & 1));
           pars += generateReadLayer (r, arrays1, intNodes, realNodes,
-                                     RealType.realType, 
-                                     (numReadsArray1 >>> 1) + 
+                                     RealType.realType,
+                                     (numReadsArray1 >>> 1) +
                                      (numReadsArray1 & 1));
-          pars += generateWriteLayer (r, arrays2, intNodes, arrays1, 
-                                      Array2Type.array2Type, 
-                                      (numWritesArray2 >>> 1) + 
+          pars += generateWriteLayer (r, arrays2, intNodes, arrays1,
+                                      Array2Type.array2Type,
+                                      (numWritesArray2 >>> 1) +
                                       (numWritesArray2 & 1));
           pars += generateReadLayer (r, arrays2, intNodes, arrays1,
                                      Array1Type.array1Type,
-                                     (numReadsArray2 >>> 1) + 
+                                     (numReadsArray2 >>> 1) +
                                      (numReadsArray2 & 1));
           numWritesArray1 >>>= 1;
           numReadsArray1 >>>= 1;
@@ -4848,20 +4865,20 @@ public class FuzzSMT {
         }
 
         if (numUFuncsArray1 > 0)
-          pars += generateUTermLayer (r, sortsArray1, arrays1, uFuncsArray1, 
+          pars += generateUTermLayer (r, sortsArray1, arrays1, uFuncsArray1,
                                       minRefs);
         if (numUFuncsArray2 > 0)
-          pars += generateUTermLayer (r, sortsArray2, arrays2, uFuncsArray2, 
+          pars += generateUTermLayer (r, sortsArray2, arrays2, uFuncsArray2,
                                       minRefs);
         if (compModeArray1 == RelCompMode.EQ || numUPredsArray1 > 0)
-          pars += generateComparisonLayer (r, arrays1, boolNodes, uPredsArray1, 
+          pars += generateComparisonLayer (r, arrays1, boolNodes, uPredsArray1,
                                            minRefs, compModeArray1, true);
         if (compModeArray2 == RelCompMode.EQ || numUPredsArray2 > 0)
-          pars += generateComparisonLayer (r, arrays2, boolNodes, uPredsArray2, 
+          pars += generateComparisonLayer (r, arrays2, boolNodes, uPredsArray2,
                                            minRefs, compModeArray2, true);
-        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt, 
+        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt,
                                          minRefs, RelCompMode.FULL, true);
-        pars += generateComparisonLayer (r, realNodes, boolNodes, uPredsReal, 
+        pars += generateComparisonLayer (r, realNodes, boolNodes, uPredsReal,
                                          minRefs, RelCompMode.FULL, true);
         pars += generateITELayer (r, arrays1, boolNodes, minRefs);
         pars += generateITELayer (r, arrays2, boolNodes, minRefs);
@@ -4871,20 +4888,20 @@ public class FuzzSMT {
         while (numWritesArray1H > 0 || numReadsArray1H > 0 ||
                numWritesArray2H > 0 || numReadsArray2H > 0) {
           pars += generateWriteLayer (r, arrays1, intNodes, realNodes,
-                                      Array1Type.array1Type, 
-                                      (numWritesArray1H >>> 1) + 
+                                      Array1Type.array1Type,
+                                      (numWritesArray1H >>> 1) +
                                       (numWritesArray1H & 1));
           pars += generateReadLayer (r, arrays1, intNodes, realNodes,
-                                     RealType.realType, 
-                                     (numReadsArray1H >>> 1) + 
+                                     RealType.realType,
+                                     (numReadsArray1H >>> 1) +
                                      (numReadsArray1H & 1));
           pars += generateWriteLayer (r, arrays2, intNodes, arrays1,
-                                      Array2Type.array2Type, 
-                                      (numWritesArray2H >>> 1) + 
+                                      Array2Type.array2Type,
+                                      (numWritesArray2H >>> 1) +
                                       (numWritesArray2H & 1));
           pars += generateReadLayer (r, arrays2, intNodes, arrays1,
-                                     Array1Type.array1Type, 
-                                     (numReadsArray2H >>> 1) + 
+                                     Array1Type.array1Type,
+                                     (numReadsArray2H >>> 1) +
                                      (numReadsArray2H & 1));
           numWritesArray1H >>>= 1;
           numReadsArray1H >>>= 1;
@@ -4893,22 +4910,22 @@ public class FuzzSMT {
         }
 
         if (numUFuncsArray1 > 0)
-          pars += generateUTermLayer (r, sortsArray1, arrays1, uFuncsArray1, 
+          pars += generateUTermLayer (r, sortsArray1, arrays1, uFuncsArray1,
                                       minRefs);
         if (numUFuncsArray2 > 0)
-          pars += generateUTermLayer (r, sortsArray2, arrays2, uFuncsArray2, 
+          pars += generateUTermLayer (r, sortsArray2, arrays2, uFuncsArray2,
                                       minRefs);
         pars += generateIntLayer (r, intNodes, intConsts, uFuncsInt, uPredsInt,
                                   true, minRefs, true);
         if (compModeArray1 == RelCompMode.EQ || numUPredsArray1 > 0)
-          pars += generateComparisonLayer (r, arrays1, boolNodes, uPredsArray1, 
+          pars += generateComparisonLayer (r, arrays1, boolNodes, uPredsArray1,
                                            minRefs, compModeArray1, true);
         if (compModeArray2 == RelCompMode.EQ || numUPredsArray2 > 0)
-          pars += generateComparisonLayer (r, arrays2, boolNodes, uPredsArray2, 
+          pars += generateComparisonLayer (r, arrays2, boolNodes, uPredsArray2,
                                            minRefs, compModeArray2, true);
-        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt, 
+        pars += generateComparisonLayer (r, intNodes, boolNodes, uPredsInt,
                                          minRefs, RelCompMode.FULL, true);
-        pars += generateComparisonLayer (r, realNodes, boolNodes, uPredsReal, 
+        pars += generateComparisonLayer (r, realNodes, boolNodes, uPredsReal,
                                          minRefs, RelCompMode.FULL, true);
       }
       break;
@@ -4941,9 +4958,9 @@ public class FuzzSMT {
         pars += generateIDLLayer (r, intNodes, intConsts, boolNodes, minRefs);
         if (numUFuncs > 0)
           pars += generateUTermLayer (r, sortsInt, intNodes, uFuncs, minRefs);
-        if (numUPreds > 0) 
+        if (numUPreds > 0)
           pars += generateUPredLayer (r, intNodes, boolNodes, uPreds, minRefs);
-        pars += generateComparisonLayer (r, intNodes, boolNodes, uPreds, 
+        pars += generateComparisonLayer (r, intNodes, boolNodes, uPreds,
                                          minRefs, RelCompMode.FULL, true);
       }
       break;
@@ -4953,9 +4970,9 @@ public class FuzzSMT {
         HashSet<SMTNode> zeroConsts = new HashSet<SMTNode>();
         generateRealVars (realVars, numVars);
 	System.out.print ("(assert ");
-        pars += generateIntConstsNotFilledZero (r, intConsts, zeroConsts, 
+        pars += generateIntConstsNotFilledZero (r, intConsts, zeroConsts,
                                                 numConsts, maxBW);
-        pars += generateRDLLayer (r, realVars, intConsts, zeroConsts, 
+        pars += generateRDLLayer (r, realVars, intConsts, zeroConsts,
                                   boolNodes, minRefs, maxBW);
       }
       break;
@@ -4975,15 +4992,15 @@ public class FuzzSMT {
         if (numUPreds > 0)
           generateUPreds (r, sortsReal, uPreds, numUPreds, minArgs, maxArgs);
 	System.out.print ("(assert ");
-        pars += generateIntConstsNotFilledZero (r, intConsts, zeroConsts, 
+        pars += generateIntConstsNotFilledZero (r, intConsts, zeroConsts,
                                                 numConsts, maxBW);
-        pars += generateRDLLayer (r, realNodes, intConsts, zeroConsts, 
+        pars += generateRDLLayer (r, realNodes, intConsts, zeroConsts,
                                   boolNodes, minRefs, maxBW);
         if (numUFuncs > 0)
           pars += generateUTermLayer (r, sortsReal, realNodes, uFuncs, minRefs);
-        if (numUPreds > 0) 
+        if (numUPreds > 0)
           pars += generateUPredLayer (r, realNodes, boolNodes, uPreds, minRefs);
-        pars += generateComparisonLayer (r, realNodes, boolNodes, uPreds, 
+        pars += generateComparisonLayer (r, realNodes, boolNodes, uPreds,
                                          minRefs, RelCompMode.FULL, true);
       }
       break;
@@ -5009,10 +5026,10 @@ public class FuzzSMT {
         pars += generateIntConsts (r, intConsts, numConsts, maxBW);
         pars += generateIntLayer (r, intNodes, intConsts, uFuncs, uPreds,
                                   linear, minRefs, false);
-        pars += generateComparisonLayer (r, intNodes, boolNodes, uPreds, 
+        pars += generateComparisonLayer (r, intNodes, boolNodes, uPreds,
                                          minRefs, RelCompMode.FULL, false);
         pars += generateITELayer (r, intNodes, boolNodes, minRefs);
-        pars += generateComparisonLayer (r, intNodes, boolNodes, uPreds, 
+        pars += generateComparisonLayer (r, intNodes, boolNodes, uPreds,
                                          minRefs, RelCompMode.FULL, false);
       }
       break;
@@ -5038,15 +5055,15 @@ public class FuzzSMT {
 	System.out.print ("(assert ");
         pars += generateRealConstsNotFilledZero (r, intConstsAsReal, zeroConsts,
                                                  numConsts, maxBW, false);
-        pars += generateRealLayer (r, realNodes, intConstsAsReal, zeroConsts, 
-                                   uFuncs, uPreds, linear, false, minRefs, 
+        pars += generateRealLayer (r, realNodes, intConstsAsReal, zeroConsts,
+                                   uFuncs, uPreds, linear, false, minRefs,
                                    false);
         pars += generateComparisonLayer (r, realNodes, boolNodes, uPreds,
                                          minRefs, RelCompMode.FULL, false);
         if (enableITELayer) {
         	pars += generateITELayer (r, realNodes, boolNodes, minRefs);
         }
-        pars += generateComparisonLayer (r, realNodes, boolNodes, uPreds, 
+        pars += generateComparisonLayer (r, realNodes, boolNodes, uPreds,
                                          minRefs, RelCompMode.FULL, false);
       }
       break;
@@ -5062,10 +5079,18 @@ public class FuzzSMT {
 	System.out.print ("(assert ");
         pars += generateUTermLayer (r, sorts, nodes, uFuncs, minRefs);
         pars += generateUPredLayer (r, nodes, boolNodes, uPreds, minRefs);
-        pars += generateITELayer (r, nodes, boolNodes, 1); 
+        pars += generateITELayer (r, nodes, boolNodes, 1);
         pars += generateUPredLayer (r, nodes, boolNodes, uPreds, minRefs);
       }
       break;
+    }
+
+    /* collect all variables */
+    List<SMTNode> allVariables = new ArrayList<SMTNode>();
+    for (SMTNode node: boolNodes) {
+      if (node.getName().startsWith("v")) {
+        allVariables.add(node);
+      }
     }
 
     /* generate boolean layer */
@@ -5086,7 +5111,7 @@ public class FuzzSMT {
     }
     assert (boolNodes.size() == 1);
     assert (boolNodes.get(0).getType() == BoolType.boolType);
-    if (bvDivMode == BVDivMode.GUARD && 
+    if (bvDivMode == BVDivMode.GUARD &&
         (logic == SMTLogic.QF_BV || logic == SMTLogic.QF_UFBV || logic == SMTLogic.QF_AUFBV)){
       assert (BVDivGuards != null);
       pars += addBVDivGuards (boolNodes, BVDivGuards);
@@ -5100,7 +5125,26 @@ public class FuzzSMT {
       builder.append (")");
     builder.append ("\n");
     System.out.println(builder.toString());
-    System.out.println("(check-sat)");
+
+    if (checkSatMode == CheckSatMode.CLASSIC) {
+      System.out.println("(check-sat)");
+    } else if (checkSatMode == CheckSatMode.ASSUMPTIONS) {
+      System.out.print("(check-sat-assuming (");
+      boolean first = true;
+      for (SMTNode n: allVariables) {
+        if (r.nextBoolean()) {
+          if (!first) System.out.print(" ");
+          first = false;
+          if (r.nextBoolean()) {
+            System.out.print(n.getName());
+          } else {
+            System.out.print("(not " + n.getName() + ")");
+          }
+        }
+      }
+      System.out.println("))");
+    }
+
     System.exit (0);
   }
 
