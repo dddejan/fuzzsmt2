@@ -3195,7 +3195,8 @@ public class FuzzSMT {
 
   private enum CheckSatMode {
     CLASSIC,
-    ASSUMPTIONS
+    ASSUMPTIONS,
+    MODEL_ASSUMPTIONS
   }
 
   private enum BooleanLayerKind {
@@ -3683,7 +3684,10 @@ public class FuzzSMT {
     BVDivMode bvDivMode = BVDivMode.GUARD;
 
     StringBuilder builder;
-    ArrayList<SMTNode> boolNodes = null;
+    ArrayList<SMTNode> boolNodes = new ArrayList<SMTNode>();
+    ArrayList<SMTNode> realNodes = new ArrayList<SMTNode>();
+    ArrayList<SMTNode> intNodes = new ArrayList<SMTNode>();
+
     HashMap<SMTNode, SMTNodeKind> BVDivGuards = null;
     BooleanLayerKind booleanLayerKind = BooleanLayerKind.RANDOM;
     boolean enableITELayer = true;
@@ -3930,6 +3934,8 @@ public class FuzzSMT {
           printVersionAndExit ();
         } else if (arg.equals("-assumptions")) {
           checkSatMode = CheckSatMode.ASSUMPTIONS;
+        } else if (arg.equals("-model-assumptions")) {
+          checkSatMode = CheckSatMode.MODEL_ASSUMPTIONS;
         } else if (arg.equals("-g")) {
           bvDivMode = BVDivMode.FULL;
         } else if (arg.equals("-n")) {
@@ -4644,7 +4650,6 @@ public class FuzzSMT {
         int numWritesH, numReadsH;
         ArrayList<SMTType> sortsInt = new ArrayList<SMTType>();
         ArrayList<SMTType> sortsArray = new ArrayList<SMTType>();
-        ArrayList<SMTNode> intNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConsts = new ArrayList<SMTNode>();
         ArrayList<SMTNode> arrays = new ArrayList<SMTNode>();
         ArrayList<UFunc> uFuncsInt = new ArrayList<UFunc>();
@@ -4745,8 +4750,6 @@ public class FuzzSMT {
         ArrayList<SMTType> sortsReal = new ArrayList<SMTType>();
         ArrayList<SMTType> sortsArray1 = new ArrayList<SMTType>();
         ArrayList<SMTType> sortsArray2 = new ArrayList<SMTType>();
-        ArrayList<SMTNode> intNodes = new ArrayList<SMTNode>();
-        ArrayList<SMTNode> realNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConsts = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConstsAsReal = new ArrayList<SMTNode>();
         ArrayList<SMTNode> arrays1 = new ArrayList<SMTNode>();
@@ -4931,7 +4934,6 @@ public class FuzzSMT {
       break;
 
       case QF_IDL: {
-        ArrayList<SMTNode> intNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConsts = new ArrayList<SMTNode>();
         generateIntVars (intNodes, numVars);
 	System.out.print ("(assert ");
@@ -4941,7 +4943,6 @@ public class FuzzSMT {
       break;
       case QF_UFIDL: {
         ArrayList<SMTType> sortsInt = new ArrayList<SMTType>();
-        ArrayList<SMTNode> intNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConsts = new ArrayList<SMTNode>();
         ArrayList<UFunc> uFuncs = new ArrayList<UFunc>();
         ArrayList<UPred> uPreds = new ArrayList<UPred>();
@@ -4978,7 +4979,6 @@ public class FuzzSMT {
       break;
       case QF_UFRDL: {
         ArrayList<SMTType> sortsReal = new ArrayList<SMTType>();
-        ArrayList<SMTNode> realNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConsts = new ArrayList<SMTNode>();
         HashSet<SMTNode> zeroConsts = new HashSet<SMTNode>();
         ArrayList<UFunc> uFuncs = new ArrayList<UFunc>();
@@ -5009,7 +5009,6 @@ public class FuzzSMT {
       case QF_UFLIA:
       case QF_UFNIA: {
         ArrayList<SMTType> sorts = new ArrayList<SMTType>();
-        ArrayList<SMTNode> intNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConsts = new ArrayList<SMTNode>();
         ArrayList<UFunc> uFuncs = new ArrayList<UFunc>();
         ArrayList<UPred> uPreds = new ArrayList<UPred>();
@@ -5038,7 +5037,6 @@ public class FuzzSMT {
       case QF_UFLRA:
       case QF_UFNRA: {
         ArrayList<SMTType> sorts = new ArrayList<SMTType>();
-        ArrayList<SMTNode> realNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> intConstsAsReal = new ArrayList<SMTNode>();
         HashSet<SMTNode> zeroConsts = new HashSet<SMTNode>();
         ArrayList<UFunc> uFuncs = new ArrayList<UFunc>();
@@ -5088,6 +5086,16 @@ public class FuzzSMT {
     /* collect all variables */
     List<SMTNode> allVariables = new ArrayList<SMTNode>();
     for (SMTNode node: boolNodes) {
+      if (node.getName().startsWith("v")) {
+        allVariables.add(node);
+      }
+    }
+    for (SMTNode node: intNodes) {
+      if (node.getName().startsWith("v")) {
+        allVariables.add(node);
+      }
+    }
+    for (SMTNode node: realNodes) {
       if (node.getName().startsWith("v")) {
         allVariables.add(node);
       }
@@ -5143,9 +5151,66 @@ public class FuzzSMT {
         }
       }
       System.out.println("))");
+    } else if (checkSatMode == CheckSatMode.MODEL_ASSUMPTIONS) {
+      List<SMTNode> variables = new ArrayList<SMTNode>();
+      List<String> values = new ArrayList<String>();
+      for (SMTNode n: allVariables) {
+        if (r.nextBoolean()) {
+          SMTType nType = n.getType();
+          String nValue = getValueOfType(nType, r);
+          variables.add(n);
+          values.add(nValue);
+          System.out.println(";; CHECK: (assert (= " + n.getName() + " " + nValue + "))");
+        }
+      }
+      System.out.println(";; CHECK: (check-sat)");
+
+      System.out.print("(check-sat-assuming-model (");
+      boolean first = true;
+      for (SMTNode var: variables) {
+        if (!first) System.out.print(" ");
+        first = false;
+        System.out.print(var.getName());
+      }
+      System.out.print(") (");
+      first = true;
+      for (String value: values) {
+        if (!first) System.out.print(" ");
+        first = false;
+        System.out.print(value);
+      }
+      System.out.println("))");
     }
 
     System.exit (0);
+  }
+
+  public static String randomSMT2Int(Random r) {
+    int x = r.nextInt(100);
+    boolean neg = r.nextBoolean();
+    if (neg) {
+      return "(- " + x + ")";
+    } else {
+      return "" + x;
+    }
+  }
+
+  public static String getValueOfType(SMTType type, Random r) {
+    if (type instanceof BoolType) {
+      if (r.nextBoolean())
+        return "true";
+      else
+        return "false";
+    }
+    if (type instanceof RealType) {
+      String p = randomSMT2Int(r);
+      String q = randomSMT2Int(r);
+      return "(/ " + p + " " + q + ")";
+    }
+    if (type instanceof IntType) {
+      return randomSMT2Int(r);
+    }
+    return "unsupported";
   }
 
 }
