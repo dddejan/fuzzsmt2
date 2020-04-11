@@ -5205,6 +5205,7 @@ public class FuzzSMT {
     if (type instanceof RealType) {
       String p = randomSMT2Int(r);
       String q = randomSMT2Int(r);
+      if (q.equals("0")) q = "1";
       return "(/ " + p + " " + q + ")";
     }
     if (type instanceof IntType) {
