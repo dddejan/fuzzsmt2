@@ -5154,19 +5154,21 @@ public class FuzzSMT {
     } else if (checkSatMode == CheckSatMode.MODEL_ASSUMPTIONS) {
       List<SMTNode> variables = new ArrayList<SMTNode>();
       List<String> values = new ArrayList<String>();
+      boolean first = true;
       for (SMTNode n: allVariables) {
-        if (r.nextBoolean()) {
+        if (first || r.nextBoolean()) {
           SMTType nType = n.getType();
           String nValue = getValueOfType(nType, r);
           variables.add(n);
           values.add(nValue);
           System.out.println(";; CHECK: (assert (= " + n.getName() + " " + nValue + "))");
         }
+        first = false;
       }
       System.out.println(";; CHECK: (check-sat)");
 
       System.out.print("(check-sat-assuming-model (");
-      boolean first = true;
+      first = true;
       for (SMTNode var: variables) {
         if (!first) System.out.print(" ");
         first = false;
