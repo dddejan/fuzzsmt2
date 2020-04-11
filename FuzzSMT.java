@@ -5208,6 +5208,7 @@ public class FuzzSMT {
       String p = randomSMT2Int(r);
       String q = randomSMT2Int(r);
       if (q.equals("0")) q = "1";
+      if (q.equals("(- 0)")) q = "(- 1)";
       return "(/ " + p + " " + q + ")";
     }
     if (type instanceof IntType) {
