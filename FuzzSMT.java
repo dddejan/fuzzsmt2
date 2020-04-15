@@ -3687,6 +3687,7 @@ public class FuzzSMT {
     ArrayList<SMTNode> boolNodes = new ArrayList<SMTNode>();
     ArrayList<SMTNode> realNodes = new ArrayList<SMTNode>();
     ArrayList<SMTNode> intNodes = new ArrayList<SMTNode>();
+    ArrayList<SMTNode> bvNodes = new ArrayList<SMTNode>();
 
     HashMap<SMTNode, SMTNodeKind> BVDivGuards = null;
     BooleanLayerKind booleanLayerKind = BooleanLayerKind.RANDOM;
@@ -4508,7 +4509,6 @@ public class FuzzSMT {
     	break;
       case QF_BV:
       case QF_UFBV:{
-        ArrayList<SMTNode> bvNodes = new ArrayList<SMTNode>();
         ArrayList<UFunc> uFuncs = new ArrayList<UFunc>();
         ArrayList<UPred> uPreds = new ArrayList<UPred>();
         BVDivGuards = new HashMap<SMTNode, SMTNodeKind>();
@@ -4524,7 +4524,6 @@ public class FuzzSMT {
       }
       break;
       case QF_BVEQ:{
-        ArrayList<SMTNode> bvNodes = new ArrayList<SMTNode>();
         ArrayList<UPred> uPreds = new ArrayList<UPred>();
         generateBVVars (r, bvNodes, numVars, minBW, maxBW);
         System.out.print ("(assert ");
@@ -4536,7 +4535,6 @@ public class FuzzSMT {
       case QF_AUFBV: {
         int numExtBV = 0;
         ArrayList<SMTNode> sorts = new ArrayList<SMTNode>();
-        ArrayList<SMTNode> bvNodes = new ArrayList<SMTNode>();
         ArrayList<SMTNode> arrayNodes = new ArrayList<SMTNode>();
         ArrayList<UFunc> uFuncs = new ArrayList<UFunc>();
         ArrayList<UPred> uPreds = new ArrayList<UPred>();
@@ -5100,6 +5098,11 @@ public class FuzzSMT {
         allVariables.add(node);
       }
     }
+    for (SMTNode node: bvNodes) {
+      if (node.getName().startsWith("v")) {
+        allVariables.add(node);
+      }
+    }
 
     /* generate boolean layer */
     assert (boolNodes.size() > 0);
@@ -5197,6 +5200,11 @@ public class FuzzSMT {
     }
   }
 
+  public static String randomSMT2BV(Random r, int width) {
+    BigInteger x = new BigInteger(width, r);
+    return "(_ bv" + x + " " + width + ")";
+  }
+
   public static String getValueOfType(SMTType type, Random r) {
     if (type instanceof BoolType) {
       if (r.nextBoolean())
@@ -5213,6 +5221,9 @@ public class FuzzSMT {
     }
     if (type instanceof IntType) {
       return randomSMT2Int(r);
+    }
+    if (type instanceof BVType) {
+      return randomSMT2BV(r, ((BVType)type).getWidth());
     }
     return "unsupported";
   }
